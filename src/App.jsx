@@ -12,6 +12,8 @@ import ErrorPanel from "./components/ErrorPanel"
 import SubjectChronology from "./pages/SubjectChronology"
 import ProtectedRoute from "./components/ProtectedRoute"
 import Dashboard from "./pages/Dashboard"
+import Signup from "./pages/Signup"
+
 
 
 
@@ -109,10 +111,8 @@ function App() {
         <Route path="/communication/:id" element={<CommunicationDetails />} />
         <Route path="/admin-console" element={<AdminConsole />} />
         <Route path="/subject/:id" element={<SubjectChronology />} />
-        <Route
-            path="/"
-            element={
-              <ProtectedRoute>
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/" element={<ProtectedRoute>
                 <Home />
               </ProtectedRoute>
             }

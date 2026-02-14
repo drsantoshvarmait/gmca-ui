@@ -1,67 +1,36 @@
 import { useState } from "react"
 import { supabase } from "../supabaseClient"
-import { useNavigate } from "react-router-dom"
 
-export default function Login() {
+export default function Signup() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState("")
-  const navigate = useNavigate()
+  const [loading, setLoading] = useState(false)
 
-  async function handleLogin(e) {
+  async function handleSignup(e) {
     e.preventDefault()
     setLoading(true)
     setMessage("")
 
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { error } = await supabase.auth.signUp({
       email,
       password
     })
 
     if (error) {
       setMessage(error.message)
-      setLoading(false)
-      return
-    }
-
-    if (!data.user.email_confirmed_at) {
-      setMessage("Please confirm your email before logging in.")
-      await supabase.auth.signOut()
-      setLoading(false)
-      return
-    }
-
-    // 🔎 Check approval
-    const { data: profile, error: profileError } = await supabase
-      .from("profiles")
-      .select("is_approved, role")
-      .eq("id", data.user.id)
-      .single()
-
-    if (profileError) {
-      setMessage("Error loading profile.")
-      await supabase.auth.signOut()
-      setLoading(false)
-      return
-    }
-
-    if (!profile.is_approved) {
-      setMessage("Your account is pending admin approval.")
-      await supabase.auth.signOut()
-      setLoading(false)
-      return
+    } else {
+      setMessage("Signup successful. Please check your email to confirm.")
     }
 
     setLoading(false)
-    navigate("/dashboard")
   }
 
   return (
     <div style={{ padding: 20, maxWidth: 400 }}>
-      <h2>Login</h2>
+      <h2>Create Account</h2>
 
-      <form onSubmit={handleLogin}>
+      <form onSubmit={handleSignup}>
         <div>
           <label>Email</label><br />
           <input
@@ -86,13 +55,13 @@ export default function Login() {
 
         <div style={{ marginTop: 15 }}>
           <button type="submit" disabled={loading} style={{ width: "100%", padding: 8 }}>
-            {loading ? "Logging in..." : "Login"}
+            {loading ? "Creating..." : "Sign Up"}
           </button>
         </div>
       </form>
 
       {message && (
-        <p style={{ marginTop: 15, color: "red" }}>
+        <p style={{ marginTop: 15 }}>
           {message}
         </p>
       )}
