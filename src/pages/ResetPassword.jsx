@@ -9,26 +9,26 @@ export default function ResetPassword() {
   const [sessionReady, setSessionReady] = useState(false)
   const navigate = useNavigate()
 
-  // Check if reset session exists
   useEffect(() => {
-    async function checkSession() {
-      const { data } = await supabase.auth.getSession()
-
-      if (!data.session) {
-        setMessage("Invalid or expired reset link.")
-      } else {
-        setSessionReady(true)
+    // 🔥 VERY IMPORTANT: Let Supabase process the URL hash
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (event === "PASSWORD_RECOVERY") {
+          setSessionReady(true)
+        }
       }
-    }
+    )
 
-    checkSession()
+    return () => {
+      listener.subscription.unsubscribe()
+    }
   }, [])
 
   async function handleUpdate(e) {
     e.preventDefault()
 
     if (!sessionReady) {
-      setMessage("Reset session not ready.")
+      setMessage("Reset link not ready yet.")
       return
     }
 
@@ -41,7 +41,7 @@ export default function ResetPassword() {
     setMessage("")
 
     const { error } = await supabase.auth.updateUser({
-      password: password
+      password
     })
 
     setLoading(false)
@@ -49,17 +49,17 @@ export default function ResetPassword() {
     if (error) {
       setMessage("Error: " + error.message)
     } else {
-      setMessage("Password updated successfully. Redirecting...")
+      setMessage("Password updated successfully.")
       setTimeout(() => navigate("/login"), 2000)
     }
   }
 
   return (
-    <div style={container}>
+    <div style={{ maxWidth: 400, margin: "100px auto", textAlign: "center" }}>
       <h2>Reset Password</h2>
 
       {!sessionReady ? (
-        <p>{message || "Validating reset link..."}</p>
+        <p>Validating reset link...</p>
       ) : (
         <form onSubmit={handleUpdate}>
           <input
@@ -68,10 +68,20 @@ export default function ResetPassword() {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            style={input}
+            style={{ width: "100%", padding: 10, marginBottom: 15 }}
           />
 
-          <button type="submit" style={button} disabled={loading}>
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              width: "100%",
+              padding: 10,
+              background: "#28a745",
+              color: "#fff",
+              border: "none"
+            }}
+          >
             {loading ? "Updating..." : "Update Password"}
           </button>
         </form>
@@ -80,26 +90,4 @@ export default function ResetPassword() {
       {message && <p style={{ marginTop: 15 }}>{message}</p>}
     </div>
   )
-}
-
-const container = {
-  maxWidth: 400,
-  margin: "100px auto",
-  padding: 20,
-  textAlign: "center"
-}
-
-const input = {
-  width: "100%",
-  padding: 10,
-  marginBottom: 15
-}
-
-const button = {
-  width: "100%",
-  padding: 10,
-  background: "#28a745",
-  color: "#fff",
-  border: "none",
-  cursor: "pointer"
 }

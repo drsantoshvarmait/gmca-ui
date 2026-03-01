@@ -2,20 +2,17 @@ import { Navigate } from "react-router-dom"
 import { useEffect, useState } from "react"
 import { supabase } from "../supabaseClient"
 
-export default function ProtectedRoute({
-  children,
-  requireAdmin = false
-}) {
+export default function ProtectedRoute({ children, requireAdmin = false }) {
   const [loading, setLoading] = useState(true)
   const [allowed, setAllowed] = useState(false)
 
   useEffect(() => {
-    let subscription
+    let mounted = true
 
-    async function checkAccess(sessionUser) {
-      const user = sessionUser
+    async function checkAccess(session) {
+      if (!mounted) return
 
-      if (!user) {
+      if (!session?.user) {
         setAllowed(false)
         setLoading(false)
         return
@@ -30,7 +27,7 @@ export default function ProtectedRoute({
       const { data } = await supabase
         .from("profiles")
         .select("role")
-        .eq("id", user.id)
+        .eq("id", session.user.id)
         .single()
 
       if (data?.role === "admin") {
@@ -42,26 +39,23 @@ export default function ProtectedRoute({
       setLoading(false)
     }
 
-    // Initial session check
     supabase.auth.getSession().then(({ data }) => {
-      checkAccess(data.session?.user || null)
+      checkAccess(data.session)
     })
 
-    // Listen for login/logout
-    const { data } = supabase.auth.onAuthStateChange(
+    const { data: listener } = supabase.auth.onAuthStateChange(
       (_event, session) => {
-        checkAccess(session?.user || null)
+        checkAccess(session)
       }
     )
 
-    subscription = data.subscription
-
     return () => {
-      subscription?.unsubscribe()
+      mounted = false
+      listener.subscription.unsubscribe()
     }
   }, [requireAdmin])
 
-  if (loading) return <p>Checking access...</p>
+  if (loading) return null
 
   if (!allowed) {
     return <Navigate to="/login" replace />
