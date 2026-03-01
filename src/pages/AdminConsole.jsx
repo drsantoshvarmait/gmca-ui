@@ -4,6 +4,7 @@ import FunctionsView from "./admin/FunctionsView"
 import TriggersView from "./admin/TriggersView"
 import RLSView from "./admin/RLSView"
 import RpcContractsView from "./admin/RpcContractsView"
+import MetaDashboard from "./admin/MetaDashboard"
 
 export default function AdminConsole() {
   const [tab, setTab] = useState("schema")
@@ -18,6 +19,7 @@ export default function AdminConsole() {
         <button onClick={() => setTab("triggers")}>Triggers</button>{" "}
         <button onClick={() => setTab("rls")}>RLS Policies</button>{" "}
         <button onClick={() => setTab("rpc")}>RPC Contracts</button>
+        <button onClick={() => setTab("meta")}>Meta</button>
       </div>
 
       {tab === "schema" && <SchemaView />}
@@ -25,6 +27,7 @@ export default function AdminConsole() {
       {tab === "triggers" && <TriggersView />}
       {tab === "rls" && <RLSView />}
       {tab === "rpc" && <RpcContractsView />}
+      {tab === "meta" && <MetaDashboard />}
     </div>
   )
 }

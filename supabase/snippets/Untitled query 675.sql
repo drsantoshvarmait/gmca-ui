@@ -1,0 +1,2 @@
+select recruitment_request_id, status
+from public.recruitment_requests;

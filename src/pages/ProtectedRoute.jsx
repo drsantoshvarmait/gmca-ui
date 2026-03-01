@@ -10,10 +10,10 @@ export default function ProtectedRoute({
   const [allowed, setAllowed] = useState(false)
 
   useEffect(() => {
-    async function checkAccess() {
-      const {
-        data: { user }
-      } = await supabase.auth.getUser()
+    let subscription
+
+    async function checkAccess(sessionUser) {
+      const user = sessionUser
 
       if (!user) {
         setAllowed(false)
@@ -42,10 +42,30 @@ export default function ProtectedRoute({
       setLoading(false)
     }
 
-    checkAccess()
+    // Initial session check
+    supabase.auth.getSession().then(({ data }) => {
+      checkAccess(data.session?.user || null)
+    })
+
+    // Listen for login/logout
+    const { data } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        checkAccess(session?.user || null)
+      }
+    )
+
+    subscription = data.subscription
+
+    return () => {
+      subscription?.unsubscribe()
+    }
   }, [requireAdmin])
 
   if (loading) return <p>Checking access...</p>
 
-  return allowed ? children : <Navigate to="/" />
+  if (!allowed) {
+    return <Navigate to="/login" replace />
+  }
+
+  return children
 }
