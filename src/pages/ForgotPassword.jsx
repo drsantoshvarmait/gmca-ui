@@ -18,9 +18,12 @@ export default function ForgotPassword() {
     setLoading(true)
     setMessage("")
 
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: "https://gmca-ui.vercel.app/reset-password"
-    })
+    const { error } = await supabase.auth.resetPasswordForEmail(
+      email,
+      {
+        redirectTo: "https://gmca-ui.vercel.app/#/reset-password"
+      }
+    )
 
     if (error) {
       if (error.message.includes("rate limit")) {
