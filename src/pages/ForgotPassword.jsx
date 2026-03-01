@@ -9,20 +9,27 @@ export default function ForgotPassword() {
 
   async function handleReset(e) {
     e.preventDefault()
+
+    if (!email) {
+      setMessage("Please enter your email.")
+      return
+    }
+
     setLoading(true)
     setMessage("")
 
-    const { error } = await supabase.auth.resetPasswordForEmail(
-      email,
-      {
-        redirectTo: "http://localhost:5173/reset-password"
-      }
-    )
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: "https://gmca-ui.vercel.app/reset-password"
+    })
 
     if (error) {
-      setMessage("Error: " + error.message)
+      if (error.message.includes("rate limit")) {
+        setMessage("Too many attempts. Please wait 10–15 minutes and try again.")
+      } else {
+        setMessage("Error: " + error.message)
+      }
     } else {
-      setMessage("Password reset email sent. Check your inbox.")
+      setMessage("Password reset email sent. Please check your inbox.")
     }
 
     setLoading(false)
@@ -47,7 +54,7 @@ export default function ForgotPassword() {
         </button>
       </form>
 
-      {message && <p>{message}</p>}
+      {message && <p style={{ marginTop: 15 }}>{message}</p>}
 
       <Link to="/login">Back to Login</Link>
     </div>
