@@ -6,31 +6,24 @@ export default function ResetPassword() {
   const [password, setPassword] = useState("")
   const [message, setMessage] = useState("")
   const [loading, setLoading] = useState(false)
-  const [sessionReady, setSessionReady] = useState(false)
+  const [isRecovery, setIsRecovery] = useState(false)
   const navigate = useNavigate()
 
   useEffect(() => {
-    // 🔥 VERY IMPORTANT: Let Supabase process the URL hash
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (event === "PASSWORD_RECOVERY") {
-          setSessionReady(true)
-        }
-      }
-    )
+    // 🔥 Detect recovery token in URL hash manually
+    const hash = window.location.hash
 
-    return () => {
-      listener.subscription.unsubscribe()
+    if (hash && hash.includes("access_token")) {
+      setIsRecovery(true)
+    } else {
+      setMessage("Invalid or expired reset link.")
     }
   }, [])
 
   async function handleUpdate(e) {
     e.preventDefault()
 
-    if (!sessionReady) {
-      setMessage("Reset link not ready yet.")
-      return
-    }
+    if (!isRecovery) return
 
     if (password.length < 6) {
       setMessage("Password must be at least 6 characters.")
@@ -58,8 +51,8 @@ export default function ResetPassword() {
     <div style={{ maxWidth: 400, margin: "100px auto", textAlign: "center" }}>
       <h2>Reset Password</h2>
 
-      {!sessionReady ? (
-        <p>Validating reset link...</p>
+      {!isRecovery ? (
+        <p>{message || "Validating reset link..."}</p>
       ) : (
         <form onSubmit={handleUpdate}>
           <input

@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom"
+import { Routes, Route, useNavigate } from "react-router-dom"
 import { useEffect } from "react"
 import { supabase } from "./supabaseClient"
 
@@ -13,7 +13,7 @@ import Outbox from "./pages/Outbox"
 import SubjectChronology from "./pages/SubjectChronology"
 import IssueStock from "./pages/IssueStock"
 import DepartmentsPage from "./pages/DepartmentsPage"
-import DesignationView from "./pages/admin/DesignationView"   // ✅ NEW IMPORT
+import DesignationView from "./pages/admin/DesignationView"
 
 import ProtectedRoute from "./components/ProtectedRoute"
 import ErrorPanel from "./components/ErrorPanel"
@@ -21,21 +21,35 @@ import ForgotPassword from "./pages/ForgotPassword"
 import ResetPassword from "./pages/ResetPassword"
 
 function App() {
+  const navigate = useNavigate()
+
   useEffect(() => {
-    // Expose supabase globally (dev debugging only)
     window.supabase = supabase
-    console.log("Supabase exposed globally for debugging")
-  }, [])
+
+    // 🔥 Detect password recovery event globally
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (event === "PASSWORD_RECOVERY") {
+          navigate("/reset-password")
+        }
+      }
+    )
+
+    return () => {
+      listener.subscription.unsubscribe()
+    }
+  }, [navigate])
 
   return (
     <>
       <Routes>
-
-        {/* Public Routes */}
+        {/* Public */}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
-        {/* Protected Routes */}
+        {/* Protected */}
         <Route
           path="/"
           element={
@@ -126,7 +140,6 @@ function App() {
           }
         />
 
-        {/* ✅ NEW DESIGNATIONS ROUTE */}
         <Route
           path="/designations"
           element={
@@ -135,13 +148,8 @@ function App() {
             </ProtectedRoute>
           }
         />
-
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-
       </Routes>
 
-      {/* Global Error Monitor */}
       <ErrorPanel />
     </>
   )
