@@ -21,7 +21,7 @@ export default function ForgotPassword() {
     const { error } = await supabase.auth.resetPasswordForEmail(
       email,
       {
-        redirectTo: "https://gmca-ui.vercel.app/#/reset-password"
+        redirectTo: "https://gmca-ui.vercel.app/reset-password"
       }
     )
 
