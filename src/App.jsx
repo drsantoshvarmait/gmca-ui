@@ -22,16 +22,20 @@ import ResetPassword from "./pages/ResetPassword"
 import NotificationBell from "./components/NotificationBell"
 import TaskDetails from "./pages/TaskDetails"
 
+/* NEW PAGE */
+import WorkflowInbox from "./pages/WorkflowInbox"
+
 function App() {
+
   const navigate = useNavigate()
   const location = useLocation()
 
   useEffect(() => {
+
     window.supabase = supabase
 
-    // 🔥 Detect password recovery event globally
     const { data: listener } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      (event) => {
         if (event === "PASSWORD_RECOVERY") {
           navigate("/reset-password")
         }
@@ -41,6 +45,7 @@ function App() {
     return () => {
       listener.subscription.unsubscribe()
     }
+
   }, [navigate])
 
   const isPublicRoute = [
@@ -51,8 +56,10 @@ function App() {
   ].includes(location.pathname)
 
   return (
+
     <>
-      {/* Top Navigation (Only for Protected Pages) */}
+
+      {/* TOP NAVBAR */}
       {!isPublicRoute && (
         <div
           style={{
@@ -64,6 +71,7 @@ function App() {
             color: "white"
           }}
         >
+
           <div
             style={{ cursor: "pointer", fontWeight: "bold" }}
             onClick={() => navigate("/dashboard")}
@@ -74,17 +82,25 @@ function App() {
           <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
             <NotificationBell />
           </div>
+
         </div>
       )}
 
       <Routes>
-        {/* Public */}
+
+        {/* PUBLIC ROUTES */}
+
         <Route path="/login" element={<Login />} />
+
         <Route path="/signup" element={<Signup />} />
+
         <Route path="/forgot-password" element={<ForgotPassword />} />
+
         <Route path="/reset-password" element={<ResetPassword />} />
 
-        {/* Protected */}
+
+        {/* DASHBOARD */}
+
         <Route
           path="/"
           element={
@@ -102,6 +118,9 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+
+        {/* COMMUNICATION SYSTEM */}
 
         <Route
           path="/submit-letter"
@@ -139,29 +158,14 @@ function App() {
           }
         />
 
+
+        {/* ADMIN */}
+
         <Route
           path="/admin-console"
           element={
             <ProtectedRoute>
               <AdminConsole />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/subject/:id"
-          element={
-            <ProtectedRoute>
-              <SubjectChronology />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/issue-stock"
-          element={
-            <ProtectedRoute>
-              <IssueStock />
             </ProtectedRoute>
           }
         />
@@ -184,18 +188,55 @@ function App() {
           }
         />
 
-          <Route
-            path="/task/:id"
-            element={
-              <ProtectedRoute>
-                <TaskDetails />
-              </ProtectedRoute>
-            }
-          />
+
+        {/* SUBJECT TRACKING */}
+
+        <Route
+          path="/subject/:id"
+          element={
+            <ProtectedRoute>
+              <SubjectChronology />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/issue-stock"
+          element={
+            <ProtectedRoute>
+              <IssueStock />
+            </ProtectedRoute>
+          }
+        />
+
+
+        {/* WORKFLOW ENGINE */}
+
+        <Route
+          path="/workflow-inbox"
+          element={
+            <ProtectedRoute>
+              <WorkflowInbox />
+            </ProtectedRoute>
+          }
+        />
+
+
+        {/* TASK DETAILS */}
+
+        <Route
+          path="/task/:id"
+          element={
+            <ProtectedRoute>
+              <TaskDetails />
+            </ProtectedRoute>
+          }
+        />
 
       </Routes>
 
       <ErrorPanel />
+
     </>
   )
 }
