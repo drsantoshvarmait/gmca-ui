@@ -12,7 +12,7 @@ export default function NotificationBell() {
     setOpen(false)
 
     if (n.task_id) {
-      navigate(`/communication/${n.task_id}`)
+      navigate(`/task/${n.task_id}`)
     }
   }
 

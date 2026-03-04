@@ -20,6 +20,7 @@ import ErrorPanel from "./components/ErrorPanel"
 import ForgotPassword from "./pages/ForgotPassword"
 import ResetPassword from "./pages/ResetPassword"
 import NotificationBell from "./components/NotificationBell"
+import TaskDetails from "./pages/TaskDetails"
 
 function App() {
   const navigate = useNavigate()
@@ -182,6 +183,16 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+          <Route
+            path="/task/:id"
+            element={
+              <ProtectedRoute>
+                <TaskDetails />
+              </ProtectedRoute>
+            }
+          />
+
       </Routes>
 
       <ErrorPanel />
