@@ -1,4 +1,4 @@
-import { Routes, Route, useNavigate } from "react-router-dom"
+import { Routes, Route, useNavigate, useLocation } from "react-router-dom"
 import { useEffect } from "react"
 import { supabase } from "./supabaseClient"
 
@@ -19,9 +19,11 @@ import ProtectedRoute from "./components/ProtectedRoute"
 import ErrorPanel from "./components/ErrorPanel"
 import ForgotPassword from "./pages/ForgotPassword"
 import ResetPassword from "./pages/ResetPassword"
+import NotificationBell from "./components/NotificationBell"
 
 function App() {
   const navigate = useNavigate()
+  const location = useLocation()
 
   useEffect(() => {
     window.supabase = supabase
@@ -40,8 +42,40 @@ function App() {
     }
   }, [navigate])
 
+  const isPublicRoute = [
+    "/login",
+    "/signup",
+    "/forgot-password",
+    "/reset-password"
+  ].includes(location.pathname)
+
   return (
     <>
+      {/* Top Navigation (Only for Protected Pages) */}
+      {!isPublicRoute && (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            padding: "12px 20px",
+            backgroundColor: "#1f2937",
+            color: "white"
+          }}
+        >
+          <div
+            style={{ cursor: "pointer", fontWeight: "bold" }}
+            onClick={() => navigate("/dashboard")}
+          >
+            Governance System
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+            <NotificationBell />
+          </div>
+        </div>
+      )}
+
       <Routes>
         {/* Public */}
         <Route path="/login" element={<Login />} />
