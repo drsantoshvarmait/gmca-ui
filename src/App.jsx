@@ -21,6 +21,8 @@ import ForgotPassword from "./pages/ForgotPassword"
 import ResetPassword from "./pages/ResetPassword"
 import NotificationBell from "./components/NotificationBell"
 import TaskDetails from "./pages/TaskDetails"
+import TaskApproval from "./pages/TaskApproval"
+import TaskTimeline from "./pages/TaskTimeline"
 
 /* NEW PAGE */
 import WorkflowInbox from "./pages/WorkflowInbox"
@@ -232,6 +234,9 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        <Route path="/task/:taskId" element={<TaskApproval />} />
+        <Route path="/timeline/:taskId" element={<TaskTimeline />} />
 
       </Routes>
 
