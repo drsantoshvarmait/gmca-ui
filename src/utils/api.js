@@ -1,14 +1,19 @@
-import { supabase } from "../services/supabaseClient"
+// src/utils/api.js
+
+import { supabase } from "../supabaseClient"
 
 export async function callAIGateway(message) {
+
   const { data: { session } } = await supabase.auth.getSession()
 
   if (!session) {
     throw new Error("User not authenticated")
   }
 
+  const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
+
   const response = await fetch(
-    "https://ulfrylptbnrfewodzhck.supabase.co/functions/v1/ai-gateway",
+    `${SUPABASE_URL}/functions/v1/ai-gateway`,
     {
       method: "POST",
       headers: {

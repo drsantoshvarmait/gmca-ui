@@ -9,7 +9,7 @@ create schema if not exists task;
 -- TASKS
 -- =====================================================
 create table task.tasks (
-    id uuid primary key default uuid_generate_v4(),
+    id uuid primary key default gen_random_uuid(),
 
     tenant_id uuid not null
         references core.tenants(tenant_id) on delete cascade,
@@ -37,7 +37,7 @@ create index idx_tasks_status on task.tasks(status);
 -- TASK ASSIGNMENTS
 -- =====================================================
 create table task.task_assignments (
-    id uuid primary key default uuid_generate_v4(),
+    id uuid primary key default gen_random_uuid(),
 
     tenant_id uuid not null
         references core.tenants(tenant_id) on delete cascade,
@@ -62,7 +62,7 @@ create index idx_task_assignments_user on task.task_assignments(assigned_to);
 -- TASK COMMENTS
 -- =====================================================
 create table task.task_comments (
-    id uuid primary key default uuid_generate_v4(),
+    id uuid primary key default gen_random_uuid(),
 
     tenant_id uuid not null
         references core.tenants(tenant_id) on delete cascade,
@@ -85,7 +85,7 @@ create index idx_task_comments_task on task.task_comments(task_id);
 -- TASK STATUS HISTORY
 -- =====================================================
 create table task.task_status_history (
-    id uuid primary key default uuid_generate_v4(),
+    id uuid primary key default gen_random_uuid(),
 
     tenant_id uuid not null
         references core.tenants(tenant_id) on delete cascade,
@@ -110,7 +110,7 @@ create index idx_task_status_history_task
 -- SLA TRACKING
 -- =====================================================
 create table task.task_sla (
-    id uuid primary key default uuid_generate_v4(),
+    id uuid primary key default gen_random_uuid(),
 
     tenant_id uuid not null
         references core.tenants(tenant_id) on delete cascade,
@@ -131,7 +131,7 @@ create index idx_task_sla_task on task.task_sla(task_id);
 -- ESCALATIONS
 -- =====================================================
 create table task.task_escalations (
-    id uuid primary key default uuid_generate_v4(),
+    id uuid primary key default gen_random_uuid(),
 
     tenant_id uuid not null
         references core.tenants(tenant_id) on delete cascade,

@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { supabase } from "../supabaseClient"
+import { getCurrentPersonId } from "../utils/personUtils"
 
 export default function WorkflowInbox() {
 
   const [tasks, setTasks] = useState([])
+  const [loading, setLoading] = useState(true)
+
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -13,31 +16,57 @@ export default function WorkflowInbox() {
 
   async function loadTasks() {
 
-    const { data: userData, error: userError } = await supabase.auth.getUser()
+    try {
 
-    if (userError || !userData?.user) {
-      console.error("User not found")
-      return
+      setLoading(true)
+
+      const personId = await getCurrentPersonId()
+
+      if (!personId) {
+        console.error("Person not found for logged-in user")
+        return
+      }
+
+      const { data, error } = await supabase
+        .from("workflow_tasks")
+        .select(`
+          task_id,
+          step_name,
+          task_status,
+          created_at,
+          workflow_instances (
+            sop_id
+          )
+        `)
+        .eq("assigned_person_id", personId)
+        .eq("task_status", "pending")
+        .order("created_at", { ascending: false })
+
+      if (error) {
+        console.error("Task load error:", error)
+        return
+      }
+
+      setTasks(data || [])
+
+    } catch (err) {
+
+      console.error("Workflow inbox error:", err)
+
+    } finally {
+
+      setLoading(false)
+
     }
 
-    const userId = userData.user.id
-
-    const { data, error } = await supabase
-      .from("v_my_tasks")
-      .select("*")
-      .eq("person_id", userId)
-      .order("initiated_at", { ascending: false })
-
-    if (error) {
-      console.error("Task load error:", error)
-      return
-    }
-
-    setTasks(data || [])
   }
 
   function openTask(taskId) {
     navigate(`/task/${taskId}`)
+  }
+
+  if (loading) {
+    return <p style={{ padding: 30 }}>Loading tasks...</p>
   }
 
   return (
@@ -67,19 +96,21 @@ export default function WorkflowInbox() {
           )}
 
           {tasks.map(t => (
+
             <tr key={t.task_id}>
 
-              <td>{t.sop_title}</td>
+              <td>{t.workflow_instances?.sop_id || "-"}</td>
 
-              <td>{t.step_description}</td>
+              <td>{t.step_name}</td>
 
               <td>{t.task_status}</td>
 
               <td>
-                {new Date(t.initiated_at).toLocaleString()}
+                {new Date(t.created_at).toLocaleString()}
               </td>
 
               <td>
+
                 <button
                   onClick={() => openTask(t.task_id)}
                   style={{
@@ -93,9 +124,11 @@ export default function WorkflowInbox() {
                 >
                   Open
                 </button>
+
               </td>
 
             </tr>
+
           ))}
 
         </tbody>
@@ -103,5 +136,7 @@ export default function WorkflowInbox() {
       </table>
 
     </div>
+
   )
+
 }

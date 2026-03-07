@@ -6,26 +6,31 @@ export default function TaskTimeline() {
 
   const { taskId } = useParams()
 
-  const [history, setHistory] = useState([])
+  const [timeline, setTimeline] = useState([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     loadTimeline()
-  }, [])
+  }, [taskId])
 
   async function loadTimeline() {
 
+    setLoading(true)
+
     const { data, error } = await supabase
-      .from("v_task_history_detailed")
+      .from("v_task_timeline")
       .select("*")
       .eq("task_id", taskId)
-      .order("action_at", { ascending: true })
+      .order("event_time", { ascending: true })
 
     if (error) {
-      console.error(error)
+      console.error("Timeline load error:", error)
+      setLoading(false)
       return
     }
 
-    setHistory(data || [])
+    setTimeline(data || [])
+    setLoading(false)
   }
 
   return (
@@ -34,41 +39,54 @@ export default function TaskTimeline() {
 
       <h2>Workflow Timeline</h2>
 
+      {loading && (
+        <p>Loading timeline...</p>
+      )}
+
+      {!loading && timeline.length === 0 && (
+        <p>No history available</p>
+      )}
+
       <div style={{ marginTop: 20 }}>
 
-        {history.length === 0 && (
-          <p>No history available</p>
-        )}
-
-        {history.map((h, index) => (
+        {timeline.map((event, index) => (
 
           <div
             key={index}
             style={{
               borderLeft: "4px solid #2563eb",
               paddingLeft: 20,
-              marginBottom: 20
+              marginBottom: 20,
+              position: "relative"
             }}
           >
 
-            <div style={{ fontWeight: "bold" }}>
-              {h.step_description}
+            <div
+              style={{
+                position: "absolute",
+                left: -8,
+                top: 4,
+                width: 12,
+                height: 12,
+                background: "#2563eb",
+                borderRadius: "50%"
+              }}
+            />
+
+            <div style={{ fontWeight: "bold", fontSize: 16 }}>
+              {event.event_type}
             </div>
 
             <div>
-              Officer: {h.person_name || "Unknown"}
+              Source: {event.source}
             </div>
 
             <div>
-              Action: {h.action}
+              Remarks: {event.remarks || "-"}
             </div>
 
-            <div>
-              Remarks: {h.remarks || "-"}
-            </div>
-
-            <div style={{ color: "#666" }}>
-              {new Date(h.action_at).toLocaleString()}
+            <div style={{ color: "#666", fontSize: 13 }}>
+              {new Date(event.event_time).toLocaleString()}
             </div>
 
           </div>
@@ -78,5 +96,6 @@ export default function TaskTimeline() {
       </div>
 
     </div>
+
   )
 }

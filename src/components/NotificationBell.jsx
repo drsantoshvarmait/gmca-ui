@@ -1,42 +1,81 @@
 import { useNavigate } from "react-router-dom"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { supabase } from "../supabaseClient"
 
 export default function NotificationBell() {
 
   const navigate = useNavigate()
+
   const [notifications, setNotifications] = useState([])
   const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(true)
+
+  const dropdownRef = useRef(null)
 
   useEffect(() => {
     loadNotifications()
+
+    // realtime refresh
+
+  }, [])
+
+  // close dropdown when clicking outside
+  useEffect(() => {
+
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setOpen(false)
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside)
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+
   }, [])
 
   async function loadNotifications() {
 
-    const { data } = await supabase
-      .from("v_my_notifications")
+    setLoading(true)
+
+    const { data, error } = await supabase
+      .from("v_notifications")
       .select("*")
       .order("created_at", { ascending: false })
+      .limit(20)
 
-    setNotifications(data || [])
+    if (!error && data) {
+      setNotifications(data)
+    }
+
+    setLoading(false)
   }
 
-  const unreadCount = notifications.filter(n => !n.is_read).length
+  const unreadCount = notifications.filter(n => !n.read).length
 
   async function markAsRead(id) {
 
-    await supabase
+    const { error } = await supabase
       .from("notification_queue")
       .update({ is_read: true })
       .eq("notification_queue_id", id)
 
-    loadNotifications()
+    if (!error) {
+      setNotifications(prev =>
+        prev.map(n =>
+          n.notification_queue_id === id ? { ...n, is_read: true } : n
+        )
+      )
+    }
   }
 
   async function handleClick(n) {
 
     await markAsRead(n.notification_queue_id)
+
+    setOpen(false)
 
     if (n.task_id) {
       navigate(`/task/${n.task_id}`)
@@ -45,41 +84,105 @@ export default function NotificationBell() {
 
   return (
 
-    <div style={{ position: "relative" }}>
+    <div ref={dropdownRef} style={{ position: "relative" }}>
+
+      {/* Bell Button */}
 
       <button
         onClick={() => setOpen(!open)}
-        style={{ background: "none", border: "none", cursor: "pointer", fontSize: 20 }}
+        style={{
+          background: "none",
+          border: "none",
+          cursor: "pointer",
+          fontSize: 20,
+          position: "relative"
+        }}
       >
-        🔔 {unreadCount > 0 && <span style={{ color: "red" }}>({unreadCount})</span>}
+        🔔
+
+        {unreadCount > 0 && (
+          <span
+            style={{
+              color: "white",
+              background: "red",
+              borderRadius: "50%",
+              padding: "2px 6px",
+              fontSize: 12,
+              position: "absolute",
+              top: -6,
+              right: -10
+            }}
+          >
+            {unreadCount}
+          </span>
+        )}
       </button>
 
-      {open && (
-        <div style={{
-          position: "absolute",
-          right: 0,
-          width: 320,
-          background: "white",
-          border: "1px solid #ddd",
-          borderRadius: 6
-        }}>
+      {/* Dropdown */}
 
-          {notifications.map(n => (
+      {open && (
+
+        <div
+          style={{
+            position: "absolute",
+            right: 0,
+            marginTop: 8,
+            width: 320,
+            background: "white",
+            border: "1px solid #ddd",
+            borderRadius: 6,
+            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+            maxHeight: 400,
+            overflowY: "auto",
+            zIndex: 1000
+          }}
+        >
+
+          {loading && (
+            <div style={{ padding: 12 }}>
+              Loading notifications...
+            </div>
+          )}
+
+          {!loading && notifications.length === 0 && (
+            <div style={{ padding: 12 }}>
+              No notifications
+            </div>
+          )}
+
+          {!loading && notifications.map(n => (
+
             <div
-              key={n.notification_queue_id}
+              key={n.id}
               onClick={() => handleClick(n)}
               style={{
                 padding: 12,
                 borderBottom: "1px solid #eee",
                 cursor: "pointer",
-                background: n.is_read ? "#fff" : "#eef6ff"
+                background: n.read ? "#fff" : "#eef6ff"
               }}
             >
-              <div>{n.message || "Workflow update"}</div>
+
+              <div style={{ fontSize: 14 }}>
+                {n.message || "Workflow update"}
+              </div>
+
+              <div
+                style={{
+                  fontSize: 11,
+                  color: "#666",
+                  marginTop: 4
+                }}
+              >
+                {new Date(n.created_at).toLocaleString()}
+              </div>
+
             </div>
+
           ))}
 
         </div>
+
       )}
 
     </div>

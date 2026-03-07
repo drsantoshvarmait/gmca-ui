@@ -9,11 +9,11 @@
 
 insert into core.roles (role_id, role_name, role_scope)
 values
-    (uuid_generate_v4(), 'SUPER_ADMIN', 'GLOBAL'),
-    (uuid_generate_v4(), 'TENANT_ADMIN', 'TENANT'),
-    (uuid_generate_v4(), 'DEPARTMENT_HEAD', 'TENANT'),
-    (uuid_generate_v4(), 'OFFICER', 'TENANT'),
-    (uuid_generate_v4(), 'VIEWER', 'TENANT')
+    (gen_random_uuid(), 'SUPER_ADMIN', 'GLOBAL'),
+    (gen_random_uuid(), 'TENANT_ADMIN', 'TENANT'),
+    (gen_random_uuid(), 'DEPARTMENT_HEAD', 'TENANT'),
+    (gen_random_uuid(), 'OFFICER', 'TENANT'),
+    (gen_random_uuid(), 'VIEWER', 'TENANT')
 on conflict do nothing;
 
 
@@ -23,15 +23,15 @@ on conflict do nothing;
 
 insert into core.permissions (permission_id, permission_code, module, action, description)
 values
-    (uuid_generate_v4(), 'TASK_CREATE', 'TASK', 'CREATE', 'Create new task'),
-    (uuid_generate_v4(), 'TASK_UPDATE', 'TASK', 'UPDATE', 'Update task details'),
-    (uuid_generate_v4(), 'TASK_ASSIGN', 'TASK', 'ASSIGN', 'Assign task to user'),
-    (uuid_generate_v4(), 'TASK_VIEW', 'TASK', 'VIEW', 'View task'),
-    (uuid_generate_v4(), 'TASK_APPROVE', 'TASK', 'APPROVE', 'Approve task'),
-    (uuid_generate_v4(), 'TASK_ESCALATE', 'TASK', 'ESCALATE', 'Escalate task'),
-    (uuid_generate_v4(), 'ADMIN_MANAGE_USERS', 'ADMIN', 'MANAGE_USERS', 'Manage users'),
-    (uuid_generate_v4(), 'ADMIN_MANAGE_ROLES', 'ADMIN', 'MANAGE_ROLES', 'Manage roles'),
-    (uuid_generate_v4(), 'ADMIN_VIEW_DASHBOARD', 'ADMIN', 'VIEW_DASHBOARD', 'View admin dashboard')
+    (gen_random_uuid(), 'TASK_CREATE', 'TASK', 'CREATE', 'Create new task'),
+    (gen_random_uuid(), 'TASK_UPDATE', 'TASK', 'UPDATE', 'Update task details'),
+    (gen_random_uuid(), 'TASK_ASSIGN', 'TASK', 'ASSIGN', 'Assign task to user'),
+    (gen_random_uuid(), 'TASK_VIEW', 'TASK', 'VIEW', 'View task'),
+    (gen_random_uuid(), 'TASK_APPROVE', 'TASK', 'APPROVE', 'Approve task'),
+    (gen_random_uuid(), 'TASK_ESCALATE', 'TASK', 'ESCALATE', 'Escalate task'),
+    (gen_random_uuid(), 'ADMIN_MANAGE_USERS', 'ADMIN', 'MANAGE_USERS', 'Manage users'),
+    (gen_random_uuid(), 'ADMIN_MANAGE_ROLES', 'ADMIN', 'MANAGE_ROLES', 'Manage roles'),
+    (gen_random_uuid(), 'ADMIN_VIEW_DASHBOARD', 'ADMIN', 'VIEW_DASHBOARD', 'View admin dashboard')
 on conflict do nothing;
 
 

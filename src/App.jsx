@@ -1,5 +1,5 @@
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { supabase } from "./supabaseClient"
 
 import Login from "./pages/Login"
@@ -20,32 +20,57 @@ import ErrorPanel from "./components/ErrorPanel"
 import ForgotPassword from "./pages/ForgotPassword"
 import ResetPassword from "./pages/ResetPassword"
 import NotificationBell from "./components/NotificationBell"
+import ToastProvider from "./components/ToastProvider"
+
 import TaskDetails from "./pages/TaskDetails"
 import TaskApproval from "./pages/TaskApproval"
 import TaskTimeline from "./pages/TaskTimeline"
 
-/* NEW PAGE */
+import AdminWorkflows from "./pages/admin/AdminWorkflows"
+import AdminDocs from "./pages/admin/AdminDocs"
+import AdminNotifications from "./pages/admin/AdminNotifications"
+import AdminSettings from "./pages/admin/AdminSettings"
+import AdminOrganizations from "./pages/admin/AdminOrganizations"
+import AdminWorkflowDashboard from "./pages/admin/AdminWorkflowDashboard"
+
 import WorkflowInbox from "./pages/WorkflowInbox"
+import WorkflowInspector from "./pages/admin/WorkflowInspector"
+import TestHeatmapAPI from "./pages/admin/TestHeatmapAPI"
+import WorkflowBottleneckHeatmap from "./pages/admin/WorkflowBottleneckHeatmap"
+import WorkflowControlTower from "./pages/admin/WorkflowControlTower"
 
 function App() {
 
   const navigate = useNavigate()
   const location = useLocation()
 
+  const [user, setUser] = useState(null)
+
   useEffect(() => {
 
     window.supabase = supabase
 
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      (event) => {
+    const getUser = async () => {
+      const { data } = await supabase.auth.getUser()
+      setUser(data?.user ?? null)
+    }
+
+    getUser()
+
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+
         if (event === "PASSWORD_RECOVERY") {
           navigate("/reset-password")
         }
+
+        setUser(session?.user ?? null)
+
       }
     )
 
     return () => {
-      listener.subscription.unsubscribe()
+      authListener.subscription.unsubscribe()
     }
 
   }, [navigate])
@@ -61,8 +86,14 @@ function App() {
 
     <>
 
+      {/* REALTIME TOAST NOTIFICATIONS */}
+
+      <ToastProvider user={user} />
+
       {/* TOP NAVBAR */}
+
       {!isPublicRoute && (
+
         <div
           style={{
             display: "flex",
@@ -86,6 +117,7 @@ function App() {
           </div>
 
         </div>
+
       )}
 
       <Routes>
@@ -93,11 +125,8 @@ function App() {
         {/* PUBLIC ROUTES */}
 
         <Route path="/login" element={<Login />} />
-
         <Route path="/signup" element={<Signup />} />
-
         <Route path="/forgot-password" element={<ForgotPassword />} />
-
         <Route path="/reset-password" element={<ResetPassword />} />
 
 
@@ -105,20 +134,12 @@ function App() {
 
         <Route
           path="/"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
+          element={<ProtectedRoute><Dashboard /></ProtectedRoute>}
         />
 
         <Route
           path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
+          element={<ProtectedRoute><Dashboard /></ProtectedRoute>}
         />
 
 
@@ -126,89 +147,97 @@ function App() {
 
         <Route
           path="/submit-letter"
-          element={
-            <ProtectedRoute>
-              <SubmitLetter />
-            </ProtectedRoute>
-          }
+          element={<ProtectedRoute><SubmitLetter /></ProtectedRoute>}
         />
 
         <Route
           path="/outbox"
-          element={
-            <ProtectedRoute>
-              <Outbox />
-            </ProtectedRoute>
-          }
+          element={<ProtectedRoute><Outbox /></ProtectedRoute>}
         />
 
         <Route
           path="/communications"
-          element={
-            <ProtectedRoute>
-              <Communications />
-            </ProtectedRoute>
-          }
+          element={<ProtectedRoute><Communications /></ProtectedRoute>}
         />
 
         <Route
           path="/communication/:id"
-          element={
-            <ProtectedRoute>
-              <CommunicationDetails />
-            </ProtectedRoute>
-          }
+          element={<ProtectedRoute><CommunicationDetails /></ProtectedRoute>}
         />
 
 
-        {/* ADMIN */}
+        {/* ADMIN CONSOLE */}
 
         <Route
           path="/admin-console"
-          element={
-            <ProtectedRoute>
-              <AdminConsole />
-            </ProtectedRoute>
-          }
+          element={<ProtectedRoute><AdminConsole /></ProtectedRoute>}
         />
 
         <Route
+          path="/admin"
+          element={<ProtectedRoute><AdminConsole /></ProtectedRoute>}
+        />
+
+
+        {/* ADMIN MODULES */}
+
+        <Route
           path="/departments"
-          element={
-            <ProtectedRoute>
-              <DepartmentsPage />
-            </ProtectedRoute>
-          }
+          element={<ProtectedRoute><DepartmentsPage /></ProtectedRoute>}
         />
 
         <Route
           path="/designations"
-          element={
-            <ProtectedRoute>
-              <DesignationView />
-            </ProtectedRoute>
-          }
-        />
-
-
-        {/* SUBJECT TRACKING */}
-
-        <Route
-          path="/subject/:id"
-          element={
-            <ProtectedRoute>
-              <SubjectChronology />
-            </ProtectedRoute>
-          }
+          element={<ProtectedRoute><DesignationView /></ProtectedRoute>}
         />
 
         <Route
-          path="/issue-stock"
-          element={
-            <ProtectedRoute>
-              <IssueStock />
-            </ProtectedRoute>
-          }
+          path="/admin/workflows"
+          element={<ProtectedRoute><AdminWorkflows /></ProtectedRoute>}
+        />
+
+        <Route
+          path="/admin/docs"
+          element={<ProtectedRoute><AdminDocs /></ProtectedRoute>}
+        />
+
+        <Route
+          path="/admin/notifications"
+          element={<ProtectedRoute><AdminNotifications /></ProtectedRoute>}
+        />
+
+        <Route
+          path="/admin/settings"
+          element={<ProtectedRoute><AdminSettings /></ProtectedRoute>}
+        />
+
+        <Route
+          path="/admin/organizations"
+          element={<ProtectedRoute><AdminOrganizations /></ProtectedRoute>}
+        />
+
+
+        {/* WORKFLOW MONITORING */}
+
+        <Route
+          path="/admin/workflow-monitor"
+          element={<ProtectedRoute><AdminWorkflowDashboard /></ProtectedRoute>}
+        />
+
+
+        {/* WORKFLOW HEATMAP */}
+
+        <Route
+          path="/admin/workflow-heatmap"
+          element={<ProtectedRoute><WorkflowBottleneckHeatmap /></ProtectedRoute>}
+        />
+
+
+        {/* TEST PAGE */}
+
+        <Route
+          path="/admin/test-heatmap"
+          element={<ProtectedRoute><TestHeatmapAPI /></ProtectedRoute>}
         />
 
 
@@ -216,27 +245,39 @@ function App() {
 
         <Route
           path="/workflow-inbox"
-          element={
-            <ProtectedRoute>
-              <WorkflowInbox />
-            </ProtectedRoute>
-          }
+          element={<ProtectedRoute><WorkflowInbox /></ProtectedRoute>}
         />
 
 
-        {/* TASK DETAILS */}
+        {/* TASKS */}
 
         <Route
           path="/task/:id"
-          element={
-            <ProtectedRoute>
-              <TaskDetails />
-            </ProtectedRoute>
-          }
+          element={<ProtectedRoute><TaskDetails /></ProtectedRoute>}
         />
 
-        <Route path="/task/:taskId" element={<TaskApproval />} />
-        <Route path="/timeline/:taskId" element={<TaskTimeline />} />
+        <Route
+          path="/task/:taskId"
+          element={<ProtectedRoute><TaskApproval /></ProtectedRoute>}
+        />
+
+        <Route
+          path="/timeline/:taskId"
+          element={<ProtectedRoute><TaskTimeline /></ProtectedRoute>}
+        />
+
+
+        {/* WORKFLOW INSPECTOR */}
+
+        <Route
+          path="/admin/workflow-inspector"
+          element={<ProtectedRoute><WorkflowInspector /></ProtectedRoute>}
+        />
+
+        <Route
+          path="/admin/control-tower"
+          element={<ProtectedRoute><WorkflowControlTower /></ProtectedRoute>}
+        />
 
       </Routes>
 

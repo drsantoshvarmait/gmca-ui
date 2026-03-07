@@ -8,7 +8,7 @@
 -- =====================================================
 
 create table core.permissions (
-    permission_id uuid primary key default uuid_generate_v4(),
+    permission_id uuid primary key default gen_random_uuid(),
     permission_code text not null unique,
     module text not null,
     action text not null,
