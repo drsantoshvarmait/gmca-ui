@@ -26,6 +26,42 @@ export default function AdminConsole() {
         }}>
           {import.meta.env.VITE_APP_ENV || "LOCAL"}
         </span>
+
+        {import.meta.env.VITE_APP_ENV === "DEV" && (
+          <button
+            onClick={() => window.open(import.meta.env.VITE_STAGING_URL || "https://gmca-ui-staging.vercel.app/", "_blank")}
+            style={{
+              marginLeft: "auto",
+              backgroundColor: "#f59e0b",
+              color: "white",
+              border: "none",
+              padding: "8px 16px",
+              borderRadius: "8px",
+              fontWeight: "bold",
+              cursor: "pointer"
+            }}
+          >
+            🚀 Promote to STAGING
+          </button>
+        )}
+
+        {import.meta.env.VITE_APP_ENV === "STAGING" && (
+          <button
+            onClick={() => window.open(import.meta.env.VITE_PROD_URL || "https://gmca-ui.vercel.app/", "_blank")}
+            style={{
+              marginLeft: "auto",
+              backgroundColor: "#ef4444",
+              color: "white",
+              border: "none",
+              padding: "8px 16px",
+              borderRadius: "8px",
+              fontWeight: "bold",
+              cursor: "pointer"
+            }}
+          >
+            🌟 Promote to PRODUCTION
+          </button>
+        )}
       </div>
 
       <div style={{
