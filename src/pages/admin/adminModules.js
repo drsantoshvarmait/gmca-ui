@@ -16,21 +16,21 @@ import AdminNotifications from "./AdminNotifications"
 import AdminSettings from "./AdminSettings"
 import TenantManagement from "./TenantManagement"
 
-export const adminModules = [
+const isDev = import.meta.env.VITE_APP_ENV === "DEV" || !import.meta.env.VITE_APP_ENV;
+
+const allModules = [
 
   { id: "tenants", label: "Tenants", component: TenantManagement },
 
-  { id: "schema", label: "Schema", component: SchemaView },
-
-  { id: "functions", label: "Functions", component: FunctionsView },
-
-  { id: "triggers", label: "Triggers", component: TriggersView },
-
-  { id: "rls", label: "RLS Policies", component: RLSView },
-
-  { id: "rpc", label: "RPC Contracts", component: RpcContractsView },
-
-  { id: "meta", label: "Meta", component: MetaDashboard },
+  // --- INFRASTRUCTURE (DEV ONLY) ---
+  ...(isDev ? [
+    { id: "schema", label: "Schema", component: SchemaView },
+    { id: "functions", label: "Functions", component: FunctionsView },
+    { id: "triggers", label: "Triggers", component: TriggersView },
+    { id: "rls", label: "RLS Policies", component: RLSView },
+    { id: "rpc", label: "RPC Contracts", component: RpcContractsView },
+    { id: "meta", label: "Meta", component: MetaDashboard },
+  ] : []),
 
   { id: "docs", label: "Docs", component: DocsViewer },
 
@@ -59,3 +59,5 @@ export const adminModules = [
   { id: "settings", label: "Settings", component: AdminSettings }
 
 ]
+
+export const adminModules = allModules
