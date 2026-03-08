@@ -7,23 +7,24 @@ console.log("ENV URL:", supabaseUrl)
 console.log("ENV KEY:", supabaseAnonKey)
 
 export const supabase = createClient(
-supabaseUrl,
-supabaseAnonKey,
-{
-db: {
-schema: "core"   // ⭐ VERY IMPORTANT
-},
-auth: {
-persistSession: true,
-autoRefreshToken: true,
-detectSessionInUrl: true,
-storage: window.localStorage
-}
-}
+    supabaseUrl,
+    supabaseAnonKey,
+    {
+        db: {
+            schema: "public"
+        },
+        auth: {
+            persistSession: true,
+            autoRefreshToken: true,
+            detectSessionInUrl: true,
+            storage: window.localStorage
+        }
+    }
 )
 
 // Schema helpers
 export const core = supabase.schema("core")
 export const task = supabase.schema("task")
-export const monitoring = supabase.schema("monitoring")
+export const finance = supabase.schema("finance")
 export const audit = supabase.schema("audit")
+export const publicDb = supabase.schema("public")

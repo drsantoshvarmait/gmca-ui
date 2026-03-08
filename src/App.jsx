@@ -39,6 +39,8 @@ import TestHeatmapAPI from "./pages/admin/TestHeatmapAPI"
 import WorkflowBottleneckHeatmap from "./pages/admin/WorkflowBottleneckHeatmap"
 import WorkflowControlTower from "./pages/admin/WorkflowControlTower"
 
+import FinanceDashboard from "./pages/FinanceDashboard"
+
 function App() {
 
   const navigate = useNavigate()
@@ -277,6 +279,11 @@ function App() {
         <Route
           path="/admin/control-tower"
           element={<ProtectedRoute><WorkflowControlTower /></ProtectedRoute>}
+        />
+
+        <Route
+          path="/finance"
+          element={<ProtectedRoute><FinanceDashboard /></ProtectedRoute>}
         />
 
       </Routes>

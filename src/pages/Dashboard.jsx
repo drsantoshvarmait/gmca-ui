@@ -238,6 +238,7 @@ export default function Dashboard() {
           <ActionButton label="⚙ Admin Console" onClick={() => navigate("/admin-console")} />
           <ActionButton label="🏛 View Departments" onClick={() => navigate("/departments")} />
           <ActionButton label="📥 Workflow Inbox" onClick={() => navigate("/workflow-inbox")} />
+          <ActionButton label="💰 Finance Dashboard" onClick={() => navigate("/finance")} />
 
           <button onClick={testAI} style={aiBtn}>
             {aiLoading ? "Testing AI..." : "🧠 Test AI Gateway"}

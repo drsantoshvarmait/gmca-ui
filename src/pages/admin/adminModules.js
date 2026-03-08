@@ -14,8 +14,11 @@ import WorkflowInstances from "./WorkflowInstances"
 import AdminOrganizations from "./AdminOrganizations"
 import AdminNotifications from "./AdminNotifications"
 import AdminSettings from "./AdminSettings"
+import TenantManagement from "./TenantManagement"
 
 export const adminModules = [
+
+  { id: "tenants", label: "Tenants", component: TenantManagement },
 
   { id: "schema", label: "Schema", component: SchemaView },
 
