@@ -5,10 +5,6 @@ export default function MyTasks() {
 
   const [tasks, setTasks] = useState([]);
 
-  useEffect(() => {
-    loadTasks();
-  }, []);
-
   async function loadTasks() {
 
     const user = await supabase.auth.getUser();
@@ -16,10 +12,14 @@ export default function MyTasks() {
     const { data } = await supabase
       .from("v_my_tasks")
       .select("*")
-      .eq("person_id", user.data.user.id);
+      .eq("person_id", user.data?.user?.id);
 
     setTasks(data || []);
   }
+
+  useEffect(() => {
+    loadTasks();
+  }, []);
 
   return (
     <div>

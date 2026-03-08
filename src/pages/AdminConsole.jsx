@@ -12,7 +12,21 @@ export default function AdminConsole() {
   return (
     <div style={{ padding: 20 }}>
 
-      <h2>SGV Admin Console</h2>
+      <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "20px" }}>
+        <h2 style={{ margin: 0 }}>SGV Admin Console</h2>
+        <span style={{
+          backgroundColor: import.meta.env.VITE_APP_ENV === "PROD" ? "#ef4444" :
+            import.meta.env.VITE_APP_ENV === "STAGING" ? "#f59e0b" : "#3b82f6",
+          color: "white",
+          padding: "4px 12px",
+          borderRadius: "20px",
+          fontSize: "12px",
+          fontWeight: "bold",
+          textTransform: "uppercase"
+        }}>
+          {import.meta.env.VITE_APP_ENV || "LOCAL"}
+        </span>
+      </div>
 
       <div style={{
         marginBottom: 20,
@@ -29,7 +43,7 @@ export default function AdminConsole() {
 
       <div>
         {ActiveComponent && (
-          <ActiveComponent {...(activeModule?.props || {})} />  
+          <ActiveComponent {...(activeModule?.props || {})} />
         )}
       </div>
     </div>

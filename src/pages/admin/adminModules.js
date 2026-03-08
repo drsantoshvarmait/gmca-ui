@@ -11,7 +11,7 @@ import WorkflowBuilder from "../WorkflowBuilder"
 
 import AdminUsers from "../AdminUsers"
 import WorkflowInstances from "./WorkflowInstances"
-import AdminOrganizations from "./AdminOrganizations"
+import OrganisationManagement from "./OrganisationManagement"
 import AdminNotifications from "./AdminNotifications"
 import AdminSettings from "./AdminSettings"
 import TenantManagement from "./TenantManagement"
@@ -52,7 +52,7 @@ export const adminModules = [
 
   { id: "instances", label: "Workflow Instances", component: WorkflowInstances },
 
-  { id: "orgs", label: "Organizations", component: AdminOrganizations },
+  { id: "orgs", label: "Organizations", component: OrganisationManagement },
 
   { id: "notifications", label: "Notifications", component: AdminNotifications },
 

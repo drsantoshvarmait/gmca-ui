@@ -1,34 +1,34 @@
 import { useEffect, useState } from "react"
 import { supabase } from "../../supabaseClient"
 
-export default function WorkflowInspector(){
+export default function WorkflowInspector() {
 
-  const [data,setData] = useState([])
+  const [data, setData] = useState([])
 
-  useEffect(()=>{
+  async function loadInspector() {
 
-    loadInspector()
-
-  },[])
-
-  async function loadInspector(){
-
-    const {data,error} = await supabase
+    const { data, error } = await supabase
       .from("v_workflow_instance_inspector")
       .select("*")
-      .order("started_at",{ascending:false})
+      .order("started_at", { ascending: false })
 
-    if(!error) setData(data)
+    if (!error) setData(data)
 
   }
 
-  return(
+  useEffect(() => {
 
-    <div style={{padding:20}}>
+    loadInspector()
+
+  }, [])
+
+  return (
+
+    <div style={{ padding: 20 }}>
 
       <h2>Workflow Instance Inspector</h2>
 
-      <table style={{width:"100%",borderCollapse:"collapse"}}>
+      <table style={{ width: "100%", borderCollapse: "collapse" }}>
 
         <thead>
           <tr>
@@ -45,7 +45,7 @@ export default function WorkflowInspector(){
 
         <tbody>
 
-          {data.map(row=>(
+          {data.map(row => (
             <tr key={row.task_id}>
               <td>{row.workflow_instance_id}</td>
               <td>{row.sop_id}</td>

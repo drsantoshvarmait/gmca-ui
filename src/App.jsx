@@ -108,10 +108,26 @@ function App() {
         >
 
           <div
-            style={{ cursor: "pointer", fontWeight: "bold" }}
-            onClick={() => navigate("/dashboard")}
+            style={{ display: "flex", alignItems: "center", gap: "10px" }}
           >
-            Governance System
+            <div
+              style={{ cursor: "pointer", fontWeight: "bold" }}
+              onClick={() => navigate("/dashboard")}
+            >
+              Governance System
+            </div>
+            <span style={{
+              backgroundColor: import.meta.env.VITE_APP_ENV === "PROD" ? "#ef4444" :
+                import.meta.env.VITE_APP_ENV === "STAGING" ? "#f59e0b" : "#3b82f6",
+              color: "white",
+              padding: "2px 8px",
+              borderRadius: "4px",
+              fontSize: "10px",
+              fontWeight: "bold",
+              textTransform: "uppercase"
+            }}>
+              {import.meta.env.VITE_APP_ENV || "LOCAL"}
+            </span>
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
