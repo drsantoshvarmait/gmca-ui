@@ -42,9 +42,7 @@ jobs:
 
       # --- Database Migrations ---
       - name: Setup Supabase CLI
-        uses: supabase/setup-supabase@v1
-        with:
-          next: true
+        uses: supabase/setup-cli@v1
 
       - name: Deploy Database Migrations
         run: supabase db push --project-ref ${{ secrets.STAGING_SUPABASE_PROJECT_ID }} --password ${{ secrets.STAGING_SUPABASE_DB_PASSWORD }}

@@ -40,9 +40,7 @@ jobs:
         run: npm run test:e2e
 
       - name: Setup Supabase CLI
-        uses: supabase/setup-supabase@v1
-        with:
-          next: true
+        uses: supabase/setup-cli@v1
 
       - name: Deploy Database Migrations (PROD)
         run: supabase db push --project-ref ${{ secrets.PROD_SUPABASE_PROJECT_ID }} --password ${{ secrets.PROD_SUPABASE_DB_PASSWORD }}
