@@ -20,7 +20,7 @@ enabled = false
 port = 55002
 shadow_port = 55012
 # health_timeout = "2m"
-major_version = 17
+major_version = 15
 
 [db.pooler]
 enabled = false
@@ -31,7 +31,7 @@ max_client_conn = 100
 
 # [db.migrations]
 # enabled = true
-schema_paths = []
+# schema_paths = []
 
 [db.seed]
 enabled = true
