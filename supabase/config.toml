@@ -15,12 +15,12 @@ enabled = false
 
 # =========================
 # DATABASE
-# =========================
+# =====================15===
 [db]
 port = 55002
 shadow_port = 55012
 # health_timeout = "2m"
-major_version = 17
+major_version = 15
 
 [db.pooler]
 enabled = false
