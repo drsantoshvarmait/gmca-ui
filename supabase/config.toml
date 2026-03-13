@@ -6,8 +6,8 @@ project_id = "gmca-ui"
 [api]
 enabled = true
 port = 55001
-schemas = ["public", "core", "graphql_public"]
-extra_search_path = ["public", "core", "extensions"]
+schemas = ["public", "core", "graphql_public", "finance", "procurement"]
+extra_search_path = ["public", "core", "extensions", "finance", "procurement"]
 max_rows = 1000
 
 [api.tls]

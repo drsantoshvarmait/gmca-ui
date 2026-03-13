@@ -34,12 +34,19 @@ import AdminOrganizations from "./pages/admin/AdminOrganizations"
 import AdminWorkflowDashboard from "./pages/admin/AdminWorkflowDashboard"
 
 import WorkflowInbox from "./pages/WorkflowInbox"
+import WorkflowBuilder from "./pages/WorkflowBuilder"
 import WorkflowInspector from "./pages/admin/WorkflowInspector"
 import TestHeatmapAPI from "./pages/admin/TestHeatmapAPI"
 import WorkflowBottleneckHeatmap from "./pages/admin/WorkflowBottleneckHeatmap"
 import WorkflowControlTower from "./pages/admin/WorkflowControlTower"
 
 import FinanceDashboard from "./pages/FinanceDashboard"
+import ProcurementDashboard from "./pages/ProcurementDashboard"
+import PurchaseRequisitionForm from "./pages/PurchaseRequisitionForm"
+import VendorMaster from "./pages/VendorMaster"
+import GoodsReceiptForm from "./pages/GoodsReceiptForm"
+import ChartOfAccounts from "./pages/ChartOfAccounts"
+import ItemMaster from "./pages/ItemMaster"
 
 function App() {
 
@@ -266,6 +273,11 @@ function App() {
           element={<ProtectedRoute><WorkflowInbox /></ProtectedRoute>}
         />
 
+        <Route
+          path="/workflow-builder/:id"
+          element={<ProtectedRoute><WorkflowBuilder /></ProtectedRoute>}
+        />
+
 
         {/* TASKS */}
 
@@ -300,6 +312,36 @@ function App() {
         <Route
           path="/finance"
           element={<ProtectedRoute><FinanceDashboard /></ProtectedRoute>}
+        />
+
+        <Route
+          path="/procurement"
+          element={<ProtectedRoute><ProcurementDashboard /></ProtectedRoute>}
+        />
+
+        <Route
+          path="/procurement/new-requisition"
+          element={<ProtectedRoute><PurchaseRequisitionForm /></ProtectedRoute>}
+        />
+
+        <Route
+          path="/procurement/vendor-master"
+          element={<ProtectedRoute><VendorMaster /></ProtectedRoute>}
+        />
+
+        <Route
+          path="/procurement/goods-receipt"
+          element={<ProtectedRoute><GoodsReceiptForm /></ProtectedRoute>}
+        />
+
+        <Route
+          path="/finance/coa"
+          element={<ProtectedRoute><ChartOfAccounts /></ProtectedRoute>}
+        />
+
+        <Route
+          path="/procurement/item-master"
+          element={<ProtectedRoute><ItemMaster /></ProtectedRoute>}
         />
 
       </Routes>

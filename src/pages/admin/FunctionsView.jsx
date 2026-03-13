@@ -1,16 +1,14 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { supabase } from "../../supabaseClient"
+import useMetaRealtime from "./useMetaRealtime"
 
 export default function FunctionsView() {
   const [functions, setFunctions] = useState([])
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
 
-  useEffect(() => {
-    loadFunctions()
-  }, [])
-
-  async function loadFunctions() {
+  // 🔁 Stable fetch function
+  const loadFunctions = useCallback(async () => {
     setLoading(true)
     setError(null)
 
@@ -24,24 +22,53 @@ export default function FunctionsView() {
     }
 
     setLoading(false)
-  }
+  }, [])
+
+  // 📦 Initial load
+  useEffect(() => {
+    loadFunctions()
+  }, [loadFunctions])
+
+  // 🔥 Auto-refresh when meta tables/functions change
+  useMetaRealtime(loadFunctions)
 
   return (
-    <div>
+    <div style={{ padding: 10 }}>
       <h3>Functions</h3>
 
+      {/* ❌ Error Surface Panel */}
       {error && (
         <div style={errorStyle}>
           ❌ {error}
         </div>
       )}
 
+      {/* 🔄 Loading Indicator */}
       {loading && <p>Loading...</p>}
 
-      <ul>
+      {/* 📋 Functions List */}
+      {!loading && functions.length === 0 && (
+        <p style={{ color: "#666" }}>No functions found in metadata.</p>
+      )}
+
+      <ul style={{ listStyleType: "none", padding: 0 }}>
         {functions.map((fn, i) => (
-          <li key={i}>
-            {fn.function_name}
+          <li
+            key={i}
+            style={{
+              padding: "8px 12px",
+              marginBottom: "4px",
+              backgroundColor: "#f9fafb",
+              borderRadius: "6px",
+              border: "1px solid #e5e7eb",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px"
+            }}
+          >
+            <span style={{ color: "#3b82f6" }}>ƒ</span>
+            <span style={{ fontWeight: "500" }}>{fn.function_name || fn.routine_name || fn.proname || fn.name || "Unnamed Function"}</span>
+            <span style={{ color: "#9ca3af", fontSize: "12px" }}>({fn.schema || fn.routine_schema || fn.nspname || "public"})</span>
           </li>
         ))}
       </ul>
@@ -57,3 +84,4 @@ const errorStyle = {
   borderRadius: "6px",
   fontWeight: "500"
 }
+
