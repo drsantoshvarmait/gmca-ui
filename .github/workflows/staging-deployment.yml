@@ -6,6 +6,11 @@ on:
       - staging
   workflow_dispatch:
 
+permissions:
+  contents: write
+  pull-requests: write
+  deployments: write
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
