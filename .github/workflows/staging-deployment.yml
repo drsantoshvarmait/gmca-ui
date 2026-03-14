@@ -54,8 +54,8 @@ jobs:
       - name: Deploy Database Migrations
         run: |
           # Repair desynced migration record if it exists
-          supabase migration repair --status applied --db-url "postgresql://postgres.risrmpdbvoafowdvnonn:${{ secrets.STAGING_SUPABASE_DB_PASSWORD }}@aws-1-ap-south-1.pooler.supabase.com:6543/postgres?sslmode=require" 20260309200000 || true
-          supabase db push --db-url "postgresql://postgres.risrmpdbvoafowdvnonn:${{ secrets.STAGING_SUPABASE_DB_PASSWORD }}@aws-1-ap-south-1.pooler.supabase.com:6543/postgres?sslmode=require"
+          supabase migration repair --status applied --db-url "postgresql://postgres.risrmpdbvoafowdvnonn:${{ secrets.STAGING_SUPABASE_DB_PASSWORD }}@aws-1-ap-south-1.pooler.supabase.com:6543/postgres?sslmode=require&prepared_statements=false" 20260309200000 || true
+          supabase db push --db-url "postgresql://postgres.risrmpdbvoafowdvnonn:${{ secrets.STAGING_SUPABASE_DB_PASSWORD }}@aws-1-ap-south-1.pooler.supabase.com:6543/postgres?sslmode=require&prepared_statements=false"
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
 
