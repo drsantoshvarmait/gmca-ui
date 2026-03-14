@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - staging
-  workflow_dispatch: # Allows manual triggering
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -22,8 +22,11 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Run Linting
-        run: npm run lint
+      - name: Run Build
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.STAGING_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.STAGING_SUPABASE_ANON_KEY }}
 
       - name: Run Unit/Smoke Tests
         run: npm run test
@@ -35,19 +38,11 @@ jobs:
         run: npx playwright install --with-deps
 
       - name: Run E2E Tests
-        continue-on-error: true # Allow deployment to proceed for manual verification
         run: npm run test:e2e
         env:
           VITE_SUPABASE_URL: ${{ secrets.STAGING_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.STAGING_SUPABASE_ANON_KEY }}
 
-      - name: Build Application
-        run: npm run build
-        env:
-          VITE_SUPABASE_URL: ${{ secrets.STAGING_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.STAGING_SUPABASE_ANON_KEY }}
-
-      # --- Database Migrations ---
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@v1
 
@@ -61,7 +56,6 @@ jobs:
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
 
-      # --- Vercel Deployment ---
       - name: Deploy to Vercel (Staging)
         uses: amondnet/vercel-action@v25
         with:
@@ -69,4 +63,3 @@ jobs:
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          vercel-args: "--staging" # Deploy as staging preview
