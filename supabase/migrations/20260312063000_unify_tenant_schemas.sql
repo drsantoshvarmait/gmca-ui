@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS core.organisations (
 );
 
 INSERT INTO core.organisations (organisation_id, organisation_name, organisation_code, tenant_id, status, created_at)
-SELECT organisation_id, organisation_name, organisation_code, tenant_id, status, created_at 
+SELECT organisation_id, organisation_name, organisation_code, tenant_id, 'ACTIVE' as status, created_at 
 FROM public.organisations
 ON CONFLICT (organisation_code) DO NOTHING;
 
