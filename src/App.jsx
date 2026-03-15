@@ -1,5 +1,5 @@
+import React, { useEffect, useState } from "react"
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom"
-import { useEffect, useState } from "react"
 import { supabase } from "./supabaseClient"
 
 import Login from "./pages/Login"
@@ -136,9 +136,6 @@ function App() {
              (import.meta.env.VITE_APP_ENV === "STAGING" || window.location.hostname.includes("vercel.app")) ? "(STAGING)" :
              (import.meta.env.VITE_APP_ENV || "LOCAL")}
           </span>
-          {console.log("FORCE_SYNC_VERIFICATION_V2.2_TIMESTAMP:", new Date().toISOString())}
-          {console.log("HOSTNAME_CHECK:", window.location.hostname)}
-          {console.log("ENV_CHECK:", import.meta.env.VITE_APP_ENV)}
         </div>
 
         {!isPublicRoute && (

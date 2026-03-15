@@ -268,10 +268,10 @@ export default function Dashboard() {
         {/* Profile Card */}
         <div style={{ ...glassEffect, ...profileCard }}>
           <div style={profileTop}>
-             <div style={avatar}>{userProfile?.email?.[0].toUpperCase()}</div>
+             <div style={avatar}>{userProfile?.email?.[0]?.toUpperCase() || "U"}</div>
              <div style={profileInfo}>
-                <h3 style={profileName}>{userProfile?.email}</h3>
-                <p style={profileRole}>{userProfile?.role || "Unit Officer"} • {activeOrgData?.organisation_code}</p>
+                <h3 style={profileName}>{userProfile?.email || "Guest"}</h3>
+                <p style={profileRole}>{userProfile?.role || "Unit Officer"} • {activeOrgData?.organisation_code || "OFFLINE"}</p>
              </div>
           </div>
           <div style={quickStats}>
@@ -431,6 +431,7 @@ const contentGrid = { display: "grid", gridTemplateColumns: "320px 1fr", gap: "4
 const profileCard = { padding: "32px", borderRadius: "24px", height: "fit-content" }
 const profileTop = { display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", marginBottom: "32px" }
 const avatar = { width: "80px", height: "80px", borderRadius: "50%", background: "linear-gradient(135deg, #1e293b 0%, #334155 100%)", color: "white", fontSize: "32px", fontWeight: "800", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "16px" }
+const profileInfo = { display: "flex", flexDirection: "column", alignItems: "center" }
 const profileName = { margin: 0, fontSize: "20px", fontWeight: "800", color: "#1e293b", wordBreak: "break-all" }
 const profileRole = { margin: "8px 0 0", fontSize: "14px", fontWeight: "600", color: "#64748b" }
 const quickStats = { borderTop: "1px solid #f1f5f9", paddingTop: "24px" }
