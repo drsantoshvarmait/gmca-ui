@@ -102,49 +102,47 @@ function App() {
 
       {/* TOP NAVBAR */}
 
-      {!isPublicRoute && (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          padding: "12px 20px",
+          backgroundColor: "#1f2937",
+          color: "white"
+        }}
+      >
 
         <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            padding: "12px 20px",
-            backgroundColor: "#1f2937",
-            color: "white"
-          }}
+          style={{ display: "flex", alignItems: "center", gap: "10px" }}
         >
-
           <div
-            style={{ display: "flex", alignItems: "center", gap: "10px" }}
+            style={{ cursor: "pointer", fontWeight: "bold" }}
+            onClick={() => navigate("/dashboard")}
           >
-            <div
-              style={{ cursor: "pointer", fontWeight: "bold" }}
-              onClick={() => navigate("/dashboard")}
-            >
-              Governance System
-            </div>
-            <span style={{
-              backgroundColor: import.meta.env.VITE_APP_ENV === "PROD" ? "#ef4444" :
-                import.meta.env.VITE_APP_ENV === "STAGING" ? "#f59e0b" : "#3b82f6",
-              color: "white",
-              padding: "2px 8px",
-              borderRadius: "4px",
-              fontSize: "10px",
-              fontWeight: "bold",
-              textTransform: "uppercase"
-            }}>
-              {import.meta.env.VITE_APP_ENV === "STAGING" ? "(STAGING)" : (import.meta.env.VITE_APP_ENV || "LOCAL")}
-            </span>
+            Governance System
           </div>
+          <span style={{
+            backgroundColor: import.meta.env.VITE_APP_ENV === "PROD" ? "#ef4444" :
+              import.meta.env.VITE_APP_ENV === "STAGING" ? "#f59e0b" : "#3b82f6",
+            color: "white",
+            padding: "2px 8px",
+            borderRadius: "4px",
+            fontSize: "10px",
+            fontWeight: "bold",
+            textTransform: "uppercase"
+          }}>
+            {import.meta.env.VITE_APP_ENV === "STAGING" ? "(STAGING)" : (import.meta.env.VITE_APP_ENV || "LOCAL")}
+          </span>
+        </div>
 
+        {!isPublicRoute && (
           <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
             <NotificationBell />
           </div>
+        )}
 
-        </div>
-
-      )}
+      </div>
 
       <Routes>
 
