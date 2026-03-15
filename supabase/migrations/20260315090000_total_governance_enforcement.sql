@@ -25,11 +25,17 @@ WHERE sop_step_id IS NULL;
 
 -- 5. Enforce the "Total Governance" constraint
 -- We set it to NOT NULL and add the foreign key.
-ALTER TABLE task.tasks 
-  ALTER COLUMN sop_step_id SET NOT NULL,
-  ADD CONSTRAINT fk_task_sop_step 
-  FOREIGN KEY (sop_step_id) 
-  REFERENCES public.sop_step(sop_step_id);
+ALTER TABLE task.tasks ALTER COLUMN sop_step_id SET NOT NULL;
+
+DO $$ 
+BEGIN 
+    IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_task_sop_step') THEN
+        ALTER TABLE task.tasks 
+        ADD CONSTRAINT fk_task_sop_step 
+        FOREIGN KEY (sop_step_id) 
+        REFERENCES public.sop_step(sop_step_id);
+    END IF;
+END $$;
 
 -- 6. Add a helpful comment for future developers
 COMMENT ON COLUMN task.tasks.sop_step_id IS 'MANDATORY: Links every task to an SOP step for Total Governance compliance.';
