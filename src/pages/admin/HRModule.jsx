@@ -33,7 +33,7 @@ export default function HRModule() {
     async function loadMasterData() {
         try {
             setLoading(true);
-            const { data: typesData } = await supabase.from("organisation_types").select("*").order("organisation_type_name");
+            const { data: typesData } = await supabase.from("organisation_types").select("*").order("organisation_type");
             const { data: desigData } = await supabase.from("designations").select("*").order("designation_name");
 
             setOrgTypes(typesData || []);
@@ -122,7 +122,7 @@ export default function HRModule() {
                 const { data, error } = await supabase
                     .from("organisation_types")
                     .insert({
-                        organisation_type_name: orgTypeName,
+                        organisation_type: orgTypeName,
                         organisation_type_code: orgTypeCode
                     })
                     .select()
@@ -187,8 +187,8 @@ export default function HRModule() {
             return;
         }
 
-        const sourceName = orgTypes.find(t => t.organisation_type_id === mergeSourceOrgType)?.organisation_type_name;
-        const targetName = orgTypes.find(t => t.organisation_type_id === mergeTargetOrgType)?.organisation_type_name;
+        const sourceName = orgTypes.find(t => t.organisation_type_id === mergeSourceOrgType)?.organisation_type;
+        const targetName = orgTypes.find(t => t.organisation_type_id === mergeTargetOrgType)?.organisation_type;
 
         if (!window.confirm(`Merge '${sourceName}' INTO '${targetName}'? \n\nThis will reallocate all associations and DELETE the duplicate '${sourceName}'. \n\nThis cannot be undone.`)) return;
 
@@ -368,8 +368,8 @@ export default function HRModule() {
                                 <CreatableSelect
                                     placeholder="-- Select or Add Org Type --"
                                     formatCreateLabel={(inputValue) => `Add if not available: "${inputValue}"`}
-                                    options={orgTypes.map(t => ({ value: t.organisation_type_id, label: t.organisation_type_name }))}
-                                    value={selectedOrgTypeId ? { value: selectedOrgTypeId, label: orgTypes.find(t => t.organisation_type_id === selectedOrgTypeId)?.organisation_type_name || '' } : null}
+                                    options={orgTypes.map(t => ({ value: t.organisation_type_id, label: t.organisation_type }))}
+                                    value={selectedOrgTypeId ? { value: selectedOrgTypeId, label: orgTypes.find(t => t.organisation_type_id === selectedOrgTypeId)?.organisation_type || '' } : null}
                                     onChange={handleOrgTypeChange}
                                     styles={{ control: (base) => ({ ...base, borderRadius: '8px', borderColor: '#bfdbfe', backgroundColor: '#eff6ff', color: '#2563eb', fontWeight: 'bold', padding: '2px', fontSize: '14px' }) }}
                                 />
@@ -485,8 +485,8 @@ export default function HRModule() {
                         <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                             <Select
                                 placeholder="1. Select WRONG Duplicate..."
-                                options={orgTypes.map(t => ({ value: t.organisation_type_id, label: `WRONG: ${t.organisation_type_name}` }))}
-                                value={mergeSourceOrgType ? { value: mergeSourceOrgType, label: "WRONG: " + orgTypes.find(t => t.organisation_type_id === mergeSourceOrgType)?.organisation_type_name } : null}
+                                options={orgTypes.map(t => ({ value: t.organisation_type_id, label: `WRONG: ${t.organisation_type}` }))}
+                                value={mergeSourceOrgType ? { value: mergeSourceOrgType, label: "WRONG: " + orgTypes.find(t => t.organisation_type_id === mergeSourceOrgType)?.organisation_type } : null}
                                 onChange={(newValue) => setMergeSourceOrgType(newValue ? newValue.value : "")}
                                 styles={{ control: (base) => ({ ...base, borderRadius: '8px', borderColor: '#fca5a5', backgroundColor: '#fef2f2' }) }}
                             />
@@ -495,8 +495,8 @@ export default function HRModule() {
 
                             <Select
                                 placeholder="2. Select CORRECT Target..."
-                                options={orgTypes.map(t => ({ value: t.organisation_type_id, label: `TARGET: ${t.organisation_type_name}` }))}
-                                value={mergeTargetOrgType ? { value: mergeTargetOrgType, label: "TARGET: " + orgTypes.find(t => t.organisation_type_id === mergeTargetOrgType)?.organisation_type_name } : null}
+                                options={orgTypes.map(t => ({ value: t.organisation_type_id, label: `TARGET: ${t.organisation_type}` }))}
+                                value={mergeTargetOrgType ? { value: mergeTargetOrgType, label: "TARGET: " + orgTypes.find(t => t.organisation_type_id === mergeTargetOrgType)?.organisation_type } : null}
                                 onChange={(newValue) => setMergeTargetOrgType(newValue ? newValue.value : "")}
                                 styles={{ control: (base) => ({ ...base, borderRadius: '8px', borderColor: '#86efac', backgroundColor: '#f0fdf4' }) }}
                             />

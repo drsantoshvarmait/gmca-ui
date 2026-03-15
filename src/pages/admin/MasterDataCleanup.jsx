@@ -21,7 +21,7 @@ const MASTER_TABLES = {
         label: "Organisation Types",
         table: "organisation_types",
         idCol: "organisation_type_id",
-        nameCol: "organisation_type_name",
+        nameCol: "organisation_type",
         rpc: "merge_organisation_types",
         references: [
             { table: "organisations", col: "organisation_type_id", label: "Linked Organisations" },

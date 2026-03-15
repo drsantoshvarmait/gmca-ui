@@ -1,7 +1,7 @@
 -- Organisation Types & Units Schema
 CREATE TABLE IF NOT EXISTS public.organisation_types (
     organisation_type_id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
-    organisation_type_name text NOT NULL UNIQUE,
+    organisation_type text NOT NULL UNIQUE,
     created_at timestamptz DEFAULT now()
 );
 
@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS public.organisation_units (
 );
 
 -- Seed with common medical types
-INSERT INTO public.organisation_types (organisation_type_name) 
+INSERT INTO public.organisation_types (organisation_type) 
 VALUES ('Medical College'), ('Hospital'), ('District Office'), ('PHC')
 ON CONFLICT DO NOTHING;
 
@@ -22,7 +22,7 @@ DO $$
 DECLARE
     v_mc_id uuid;
 BEGIN
-    SELECT organisation_type_id INTO v_mc_id FROM public.organisation_types WHERE organisation_type_name = 'Medical College' LIMIT 1;
+    SELECT organisation_type_id INTO v_mc_id FROM public.organisation_types WHERE organisation_type = 'Medical College' LIMIT 1;
     IF v_mc_id IS NOT NULL THEN
         INSERT INTO public.organisation_units (unit_name, organisation_type_id)
         VALUES 

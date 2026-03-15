@@ -206,7 +206,7 @@ export default function SpacesManager() {
     };
 
     const fetchTypes = async () => {
-        const { data } = await supabase.from('organisation_types').select('*').order('organisation_type_name');
+        const { data } = await supabase.from('organisation_types').select('*').order('organisation_type');
         setTypes(data || []);
     };
 
@@ -238,7 +238,7 @@ export default function SpacesManager() {
         
         // UI-level duplicate check
         const isDuplicate = units.some(u => u.unit_name.trim().toLowerCase() === newItemName.trim().toLowerCase());
-        if (isDuplicate) return toast.error(`"${newItemName}" already exists under ${selectedType.organisation_type_name}`);
+        if (isDuplicate) return toast.error(`"${newItemName}" already exists under ${selectedType.organisation_type}`);
 
         const { error } = await supabase.from('organisation_type_units').insert({
             organisation_type_id: selectedType.organisation_type_id,
@@ -350,24 +350,24 @@ export default function SpacesManager() {
 
     const handleAddOrgType = async () => {
         if (!orgTypeName.trim()) return toast.error("Name is required");
-        const isDup = types.some(t => t.organisation_type_name.toLowerCase() === orgTypeName.trim().toLowerCase());
+        const isDup = types.some(t => t.organisation_type.toLowerCase() === orgTypeName.trim().toLowerCase());
         if (isDup) return toast.error(`"${orgTypeName.trim()}" already exists`);
         const autoCode = orgTypeName.trim().toUpperCase().replace(/[^A-Z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
-        const { error } = await supabase.from('organisation_types').insert({ organisation_type_name: orgTypeName.trim(), organisation_type_code: autoCode });
+        const { error } = await supabase.from('organisation_types').insert({ organisation_type: orgTypeName.trim(), organisation_type_code: autoCode });
         if (error) toast.error(error.message);
         else { toast.success("Organisation Type created"); setShowOrgTypeModal(false); setOrgTypeName(""); fetchTypes(); }
     };
 
     const handleEditOrgType = async () => {
         if (!orgTypeName.trim()) return toast.error("Name is required");
-        const { error } = await supabase.from('organisation_types').update({ organisation_type_name: orgTypeName.trim() }).eq('organisation_type_id', editingOrgType.organisation_type_id);
+        const { error } = await supabase.from('organisation_types').update({ organisation_type: orgTypeName.trim() }).eq('organisation_type_id', editingOrgType.organisation_type_id);
         if (error) toast.error(error.message);
         else { toast.success("Organisation Type renamed"); setShowOrgTypeModal(false); setEditingOrgType(null); setOrgTypeName(""); fetchTypes(); }
     };
 
     const handleDeleteOrgType = async (t, e) => {
         e.stopPropagation();
-        if (!window.confirm(`Delete "${t.organisation_type_name}"? This will also delete all Units and Sub-Units under it.`)) return;
+        if (!window.confirm(`Delete "${t.organisation_type}"? This will also delete all Units and Sub-Units under it.`)) return;
         const { error } = await supabase.from('organisation_types').delete().eq('organisation_type_id', t.organisation_type_id);
         if (error) toast.error(error.message);
         else { toast.success("Deleted"); if (selectedType?.organisation_type_id === t.organisation_type_id) { setSelectedType(null); setUnits([]); } fetchTypes(); }
@@ -427,7 +427,7 @@ export default function SpacesManager() {
                                 style={styles.treeItem(0, selectedType?.organisation_type_id === t.organisation_type_id)}
                                 onClick={() => { setSelectedType(t); fetchUnits(t.organisation_type_id); }}
                             >
-                                <span>🏢 {t.organisation_type_name}</span>
+                                <span>🏢 {t.organisation_type}</span>
                                 <div style={{ display: "flex", gap: "4px" }} onClick={e => e.stopPropagation()}>
                                     <button
                                         style={{ ...styles.miniBtn, color: "#f97316" }}
@@ -535,7 +535,7 @@ export default function SpacesManager() {
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "30px" }}>
                             <div>
                                 <h1 style={{ fontSize: "32px", fontWeight: "900", margin: 0, color: "#0f172a" }}>{selectedSpace.sub_unit_name}</h1>
-                                <p style={{ color: "#64748b", margin: "4px 0" }}>{selectedUnit.unit_name} • {selectedType.organisation_type_name}</p>
+                                <p style={{ color: "#64748b", margin: "4px 0" }}>{selectedUnit.unit_name} • {selectedType.organisation_type}</p>
                             </div>
                             <div style={{ textAlign: "right" }}>
                                 <div style={{ fontSize: "24px", fontWeight: "900", color: "#0ea5e9" }}>{selectedSpace.actual_area || '0'} sq.m</div>

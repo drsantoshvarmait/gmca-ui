@@ -12,7 +12,7 @@ DO $$
 DECLARE
     v_mc_type_id uuid;
 BEGIN
-    SELECT organisation_type_id INTO v_mc_type_id FROM public.organisation_types WHERE organisation_type_name = 'Medical College' LIMIT 1;
+    SELECT organisation_type_id INTO v_mc_type_id FROM public.organisation_types WHERE organisation_type = 'Medical College' LIMIT 1;
     IF v_mc_type_id IS NOT NULL THEN
         INSERT INTO public.organisation_type_units (organisation_type_id, unit_name)
         VALUES 

@@ -47,9 +47,9 @@ export default function AdminWorkflows() {
         .from("sop_workflow")
         .select(`
           *,
-          organisation_types:target_organisation_type_id (
-            organisation_type_name
-          )
+            organisation_types:target_organisation_type_id (
+              organisation_type
+            )
         `)
         .order("created_at", { ascending: false })
 
@@ -194,7 +194,7 @@ export default function AdminWorkflows() {
                       background: w.scope === 'GLOBAL' ? '#ede9fe' : '#e0f2fe',
                       color: w.scope === 'GLOBAL' ? '#5b21b6' : '#0369a1'
                     }}>
-                      {w.organisation_types?.organisation_type_name || w.scope || "TENANT"} {w.is_template ? " (Template)" : ""}
+                      {w.organisation_types?.organisation_type || w.scope || "TENANT"} {w.is_template ? " (Template)" : ""}
                     </span>
                   </td>
                   <td style={tdStyle}>

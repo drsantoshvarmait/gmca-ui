@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS public.organisation_unit_resource_actuals (
 -- 4. Status Report View (Calculates Gap between Blueprint and Actual)
 CREATE OR REPLACE VIEW public.vw_organisation_compliance_report AS
 SELECT 
-    ot.organisation_type_name,
+    ot.organisation_type,
     u.unit_name as department_name,
     s.sub_unit_name,
     s.id as org_sub_unit_id,

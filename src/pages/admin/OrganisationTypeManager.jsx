@@ -57,7 +57,7 @@ export default function OrganisationTypeManager() {
     const { data, error } = await supabase
       .from("organisation_types")
       .select("*")
-      .order("organisation_type_name");
+      .order("organisation_type");
     
     if (error) {
       toast.error("Failed to fetch types: " + error.message);
@@ -266,7 +266,7 @@ export default function OrganisationTypeManager() {
 
   async function handleAddType(e) {
     e.preventDefault();
-    if (!newType.organisation_type_name) return;
+    if (!newType.organisation_type) return;
 
     const { data, error } = await supabase
       .from("organisation_types")
@@ -279,7 +279,7 @@ export default function OrganisationTypeManager() {
       toast.success("Type created!");
       setTypes([data[0], ...types]);
       setShowAddType(false);
-      setNewType({ organisation_type_name: "", organisation_type_code: "", organisation_category: "Medical" });
+      setNewType({ organisation_type: "", organisation_type_code: "", organisation_category: "Medical" });
     }
   }
 
@@ -553,7 +553,7 @@ export default function OrganisationTypeManager() {
                             background: selectedType?.organisation_type_id === t.organisation_type_id ? "#eff6ff" : "white",
                         }}
                     >
-                        <span style={typeName}>{t.organisation_type_name}</span>
+                        <span style={typeName}>{t.organisation_type}</span>
                         <span style={typeCategory}>{t.organisation_category}</span>
                     </div>
                 ))}
@@ -567,7 +567,7 @@ export default function OrganisationTypeManager() {
                     <div style={header}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div>
-                                <h2 style={selectedTitle}>{selectedType.organisation_type_name}</h2>
+                                <h2 style={selectedTitle}>{selectedType.organisation_type}</h2>
                                 <p style={selectedSub}>Constituent Hierarchy & Ordering</p>
                             </div>
                             <div style={typeBadgeTag}>{selectedType.organisation_type_code}</div>
@@ -797,8 +797,8 @@ export default function OrganisationTypeManager() {
                           <input 
                             style={input} 
                             placeholder="e.g. Medical College" 
-                            value={newType.organisation_type_name}
-                            onChange={e => setNewType({ ...newType, organisation_type_name: e.target.value })}
+                            value={newType.organisation_type}
+                            onChange={e => setNewType({ ...newType, organisation_type: e.target.value })}
                           />
                       </div>
                       <div style={inputGroup}>
