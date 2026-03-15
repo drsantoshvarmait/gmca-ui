@@ -56,6 +56,8 @@ jobs:
         run: |
           supabase migration repair --status applied --db-url "postgresql://postgres.risrmpdbvoafowdvnonn:${{ secrets.STAGING_SUPABASE_DB_PASSWORD }}@aws-1-ap-south-1.pooler.supabase.com:5432/postgres?sslmode=require&pgbouncer=true&prepared_statements=false" 20260312062000 || true
           supabase migration repair --status applied --db-url "postgresql://postgres.risrmpdbvoafowdvnonn:${{ secrets.STAGING_SUPABASE_DB_PASSWORD }}@aws-1-ap-south-1.pooler.supabase.com:5432/postgres?sslmode=require&pgbouncer=true&prepared_statements=false" 20260312062500 || true
+          supabase migration repair --status reverted --db-url "postgresql://postgres.risrmpdbvoafowdvnonn:${{ secrets.STAGING_SUPABASE_DB_PASSWORD }}@aws-1-ap-south-1.pooler.supabase.com:5432/postgres?sslmode=require&pgbouncer=true&prepared_statements=false" 20260309220000 || true
+          supabase migration repair --status applied --db-url "postgresql://postgres.risrmpdbvoafowdvnonn:${{ secrets.STAGING_SUPABASE_DB_PASSWORD }}@aws-1-ap-south-1.pooler.supabase.com:5432/postgres?sslmode=require&pgbouncer=true&prepared_statements=false" 20260307030813 || true
           
           supabase db push --include-all --db-url "postgresql://postgres.risrmpdbvoafowdvnonn:${{ secrets.STAGING_SUPABASE_DB_PASSWORD }}@aws-1-ap-south-1.pooler.supabase.com:5432/postgres?sslmode=require&pgbouncer=true&prepared_statements=false"
         env:
