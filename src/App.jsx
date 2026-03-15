@@ -120,7 +120,7 @@ function App() {
             style={{ cursor: "pointer", fontWeight: "bold" }}
             onClick={() => navigate("/dashboard")}
           >
-            Governance System
+            Governance System v2.1
           </div>
           <span style={{
             backgroundColor: import.meta.env.VITE_APP_ENV === "PROD" ? "#ef4444" :
@@ -134,6 +134,7 @@ function App() {
           }}>
             {import.meta.env.VITE_APP_ENV === "STAGING" ? "(STAGING)" : (import.meta.env.VITE_APP_ENV || "LOCAL")}
           </span>
+          {console.log("NAVBAR_ENV_CHECK:", import.meta.env.VITE_APP_ENV)}
         </div>
 
         {!isPublicRoute && (
