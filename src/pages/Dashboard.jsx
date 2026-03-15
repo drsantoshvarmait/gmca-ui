@@ -28,7 +28,10 @@ export default function Dashboard() {
   const [tenantData, setTenantData] = useState(null)
   const [aiLoading, setAiLoading] = useState(false)
 
-  const env = import.meta.env.VITE_APP_ENV || "LOCAL";
+  const hostname = window.location.hostname;
+  const env = (import.meta.env.VITE_APP_ENV === "PROD" || hostname === "gmca-ui.vercel.app") ? "PROD" :
+              (import.meta.env.VITE_APP_ENV === "STAGING" || hostname.includes("staging.vercel.app")) ? "STAGING" : 
+              (import.meta.env.VITE_APP_ENV || "LOCAL");
 
   useEffect(() => {
     async function init() {
