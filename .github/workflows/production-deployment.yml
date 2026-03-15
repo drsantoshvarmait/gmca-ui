@@ -34,6 +34,7 @@ jobs:
         env:
           VITE_SUPABASE_URL: ${{ secrets.PROD_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.PROD_SUPABASE_ANON_KEY }}
+          VITE_APP_ENV: PROD
 
       - name: Run Unit/Smoke Tests
         run: npm run test

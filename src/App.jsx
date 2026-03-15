@@ -133,7 +133,7 @@ function App() {
               fontWeight: "bold",
               textTransform: "uppercase"
             }}>
-              {import.meta.env.VITE_APP_ENV || "LOCAL"}
+              {import.meta.env.VITE_APP_ENV === "STAGING" ? "(STAGING)" : (import.meta.env.VITE_APP_ENV || "LOCAL")}
             </span>
           </div>
 
