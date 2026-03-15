@@ -432,7 +432,7 @@ export default function SpacesManager() {
                                     <button
                                         style={{ ...styles.miniBtn, color: "#f97316" }}
                                         title="Rename Org Type"
-                                        onClick={(e) => { e.stopPropagation(); setEditingOrgType(t); setOrgTypeName(t.organisation_type_name); setShowOrgTypeModal(true); }}
+                                        onClick={(e) => { e.stopPropagation(); setEditingOrgType(t); setOrgTypeName(t.organisation_type); setShowOrgTypeModal(true); }}
                                     >✎</button>
                                     <button
                                         style={styles.miniBtnDanger}

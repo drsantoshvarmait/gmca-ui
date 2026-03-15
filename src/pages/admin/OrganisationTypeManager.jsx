@@ -12,7 +12,7 @@ export default function OrganisationTypeManager() {
   const [showAddType, setShowAddType] = useState(false);
   
   const [newType, setNewType] = useState({
-    organisation_type_name: "",
+    organisation_type: "",
     organisation_type_code: "",
     organisation_category: "Medical"
   });
@@ -806,7 +806,7 @@ export default function OrganisationTypeManager() {
                           <input 
                             style={input} 
                             placeholder="e.g. MC" 
-                            value={newType.organisation_type_code}
+                            value={newType.organisation_type}
                             onChange={e => setNewType({ ...newType, organisation_type_code: e.target.value })}
                           />
                       </div>
