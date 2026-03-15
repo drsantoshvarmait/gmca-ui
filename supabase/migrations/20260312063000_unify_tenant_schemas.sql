@@ -25,7 +25,7 @@ END $$;
 
 -- 2. Sync data from public.tenants to core.tenants (if any)
 INSERT INTO core.tenants (tenant_id, tenant_name, tenant_code, status, created_at)
-SELECT tenant_id, tenant_name, tenant_code, status, created_at 
+SELECT tenant_id, tenant_name, tenant_code, 'ACTIVE' as status, now() as created_at
 FROM public.tenants
 ON CONFLICT (tenant_code) DO NOTHING;
 
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS core.organisations (
 );
 
 INSERT INTO core.organisations (organisation_id, organisation_name, organisation_code, tenant_id, status, created_at)
-SELECT organisation_id, organisation_name, organisation_code, tenant_id, status, created_at 
+SELECT organisation_id, organisation_name, organisation_code, tenant_id, 'ACTIVE' as status, now() as created_at
 FROM public.organisations
 ON CONFLICT (organisation_code) DO NOTHING;
 
