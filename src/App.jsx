@@ -124,7 +124,7 @@ function App() {
           </div>
           <span style={{
             backgroundColor: (import.meta.env.VITE_APP_ENV === "PROD" || window.location.hostname === "gmca-ui.vercel.app") ? "#ef4444" :
-              (import.meta.env.VITE_APP_ENV === "STAGING" || window.location.hostname.includes("vercel.app")) ? "#f59e0b" : "#3b82f6",
+              (import.meta.env.VITE_APP_ENV === "STAGING" || window.location.hostname.includes("staging.vercel.app")) ? "#f59e0b" : "#3b82f6",
             color: "white",
             padding: "2px 8px",
             borderRadius: "4px",
@@ -133,7 +133,7 @@ function App() {
             textTransform: "uppercase"
           }}>
             {(import.meta.env.VITE_APP_ENV === "PROD" || window.location.hostname === "gmca-ui.vercel.app") ? "PROD" :
-             (import.meta.env.VITE_APP_ENV === "STAGING" || window.location.hostname.includes("vercel.app")) ? "(STAGING)" :
+             (import.meta.env.VITE_APP_ENV === "STAGING" || window.location.hostname.includes("staging.vercel.app")) ? "STAGING" :
              (import.meta.env.VITE_APP_ENV || "LOCAL")}
           </span>
         </div>
