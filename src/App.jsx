@@ -123,8 +123,8 @@ function App() {
             Governance System v2.1
           </div>
           <span style={{
-            backgroundColor: import.meta.env.VITE_APP_ENV === "PROD" ? "#ef4444" :
-              import.meta.env.VITE_APP_ENV === "STAGING" ? "#f59e0b" : "#3b82f6",
+            backgroundColor: (import.meta.env.VITE_APP_ENV === "PROD" || window.location.hostname === "gmca-ui.vercel.app") ? "#ef4444" :
+              (import.meta.env.VITE_APP_ENV === "STAGING" || window.location.hostname.includes("vercel.app")) ? "#f59e0b" : "#3b82f6",
             color: "white",
             padding: "2px 8px",
             borderRadius: "4px",
@@ -132,9 +132,12 @@ function App() {
             fontWeight: "bold",
             textTransform: "uppercase"
           }}>
-            {import.meta.env.VITE_APP_ENV === "STAGING" ? "(STAGING)" : (import.meta.env.VITE_APP_ENV || "LOCAL")}
+            {(import.meta.env.VITE_APP_ENV === "PROD" || window.location.hostname === "gmca-ui.vercel.app") ? "PROD" :
+             (import.meta.env.VITE_APP_ENV === "STAGING" || window.location.hostname.includes("vercel.app")) ? "(STAGING)" :
+             (import.meta.env.VITE_APP_ENV || "LOCAL")}
           </span>
-          {console.log("NAVBAR_ENV_CHECK:", import.meta.env.VITE_APP_ENV)}
+          {console.log("HOSTNAME_CHECK:", window.location.hostname)}
+          {console.log("ENV_CHECK:", import.meta.env.VITE_APP_ENV)}
         </div>
 
         {!isPublicRoute && (
