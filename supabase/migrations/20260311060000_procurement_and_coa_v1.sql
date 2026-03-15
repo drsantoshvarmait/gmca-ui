@@ -85,6 +85,14 @@ CREATE TABLE IF NOT EXISTS procurement.hsn_sac_master (
     is_service boolean DEFAULT false
 );
 
+-- Base Workflow Table (Stub for PR reference if missing)
+CREATE TABLE IF NOT EXISTS public.sop_workflow (
+    workflow_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    workflow_name text NOT NULL,
+    status text NOT NULL DEFAULT 'DRAFT',
+    created_at timestamptz DEFAULT now()
+);
+
 -- Purchase Requisitions (Linked to SOP Workflow)
 CREATE TABLE IF NOT EXISTS procurement.purchase_requisitions (
     pr_id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
