@@ -58,6 +58,7 @@ function App() {
   useEffect(() => {
 
     window.supabase = supabase
+    console.log("Current Environment:", import.meta.env.VITE_APP_ENV)
 
     const getUser = async () => {
       const { data } = await supabase.auth.getUser()
