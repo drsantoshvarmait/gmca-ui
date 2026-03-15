@@ -120,7 +120,7 @@ function App() {
             style={{ cursor: "pointer", fontWeight: "bold" }}
             onClick={() => navigate("/dashboard")}
           >
-            Governance System v2.1
+            Governance System v2.2 [SYNC_OK]
           </div>
           <span style={{
             backgroundColor: (import.meta.env.VITE_APP_ENV === "PROD" || window.location.hostname === "gmca-ui.vercel.app") ? "#ef4444" :
@@ -136,6 +136,7 @@ function App() {
              (import.meta.env.VITE_APP_ENV === "STAGING" || window.location.hostname.includes("vercel.app")) ? "(STAGING)" :
              (import.meta.env.VITE_APP_ENV || "LOCAL")}
           </span>
+          {console.log("FORCE_SYNC_VERIFICATION_V2.2_TIMESTAMP:", new Date().toISOString())}
           {console.log("HOSTNAME_CHECK:", window.location.hostname)}
           {console.log("ENV_CHECK:", import.meta.env.VITE_APP_ENV)}
         </div>
