@@ -56,37 +56,52 @@ create index if not exists idx_sop_step_tenant on public.sop_step(tenant_id);
 -- 3. Update RLS for sop_workflow
 alter table public.sop_workflow enable row level security;
 
-create policy "Users can view their tenant or global workflows"
-on public.sop_workflow for select
-to authenticated
-using (
-    scope = 'GLOBAL' 
-    or tenant_id = (auth.jwt() ->> 'tenant_id')::uuid
-);
+do $$
+begin
+    if not exists (select 1 from pg_policies where policyname = 'Users can view their tenant or global workflows') then
+        create policy "Users can view their tenant or global workflows"
+        on public.sop_workflow for select
+        to authenticated
+        using (
+            scope = 'GLOBAL' 
+            or tenant_id = (auth.jwt() ->> 'tenant_id')::uuid
+        );
+    end if;
+end $$;
 
-create policy "Tenant Admins can manage their workflows"
-on public.sop_workflow for all
-to authenticated
-using (
-    tenant_id = (auth.jwt() ->> 'tenant_id')::uuid
-    and exists (
-        select 1 from core.profiles
-        where id = auth.uid()
-        and (role = 'admin' or role = 'SUPER_ADMIN')
-    )
-);
+do $$
+begin
+    if not exists (select 1 from pg_policies where policyname = 'Tenant Admins can manage their workflows') then
+        create policy "Tenant Admins can manage their workflows"
+        on public.sop_workflow for all
+        to authenticated
+        using (
+            tenant_id = (auth.jwt() ->> 'tenant_id')::uuid
+            and exists (
+                select 1 from core.profiles
+                where id = auth.uid()
+                and (role = 'admin' or role = 'SUPER_ADMIN')
+            )
+        );
+    end if;
+end $$;
 
 -- 4. Update RLS for sop_step
 alter table public.sop_step enable row level security;
 
-create policy "Users can view steps within their tenant or globally"
-on public.sop_step for select
-to authenticated
-using (
-    tenant_id = (auth.jwt() ->> 'tenant_id')::uuid
-    or exists (
-        select 1 from public.sop_workflow w
-        where w.workflow_id = sop_step.sop_id
-        and w.scope = 'GLOBAL'
-    )
-);
+do $$
+begin
+    if not exists (select 1 from pg_policies where policyname = 'Users can view steps within their tenant or globally') then
+        create policy "Users can view steps within their tenant or globally"
+        on public.sop_step for select
+        to authenticated
+        using (
+            tenant_id = (auth.jwt() ->> 'tenant_id')::uuid
+            or exists (
+                select 1 from public.sop_workflow w
+                where w.workflow_id = sop_step.sop_id
+                and w.scope = 'GLOBAL'
+            )
+        );
+    end if;
+end $$;
