@@ -1,20 +1,24 @@
 import pkg from 'pg';
 const { Client } = pkg;
 
-const config = {
+const PROD_CONFIG = {
     host: 'aws-1-ap-south-1.pooler.supabase.com',
     port: 5432,
-    user: 'postgres.ulfrylptbnrfewodzhck',
+    user: 'postgres.aaritujhokbxezuxcqnm',
     password: 'Annuji1*4713',
     database: 'postgres',
     ssl: { rejectUnauthorized: false }
 };
 
-async function run() {
-    const client = new Client(config);
+async function locateDesignations() {
+    const client = new Client(PROD_CONFIG);
     try {
         await client.connect();
-        const res = await client.query("SELECT indexname, indexdef FROM pg_indexes WHERE tablename = 'organisation_unit_resource_actuals'");
+        const res = await client.query(`
+            SELECT table_schema, table_name 
+            FROM information_schema.tables 
+            WHERE table_name LIKE '%designation%'
+        `);
         console.table(res.rows);
     } catch (err) {
         console.error(err);
@@ -22,4 +26,5 @@ async function run() {
         await client.end();
     }
 }
-run();
+
+locateDesignations();

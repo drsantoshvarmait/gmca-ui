@@ -1,25 +1,23 @@
 import pkg from 'pg';
 const { Client } = pkg;
 
-const config = {
+const PROD_CONFIG = {
     host: 'aws-1-ap-south-1.pooler.supabase.com',
     port: 5432,
-    user: 'postgres.ulfrylptbnrfewodzhck',
+    user: 'postgres.aaritujhokbxezuxcqnm',
     password: 'Annuji1*4713',
     database: 'postgres',
     ssl: { rejectUnauthorized: false }
 };
 
-async function run() {
-    const client = new Client(config);
+async function locateDesignationsAcrossSchemas() {
+    const client = new Client(PROD_CONFIG);
     try {
         await client.connect();
         const res = await client.query(`
-            SELECT table_name, column_name 
-            FROM information_schema.columns 
-            WHERE column_name IN ('organisation_id', 'organisation_id_uuid', 'tenant_id')
-            AND table_schema = 'public'
-            ORDER BY table_name;
+            SELECT table_schema, table_name 
+            FROM information_schema.tables 
+            WHERE table_name LIKE '%designation%'
         `);
         console.table(res.rows);
     } catch (err) {
@@ -29,4 +27,4 @@ async function run() {
     }
 }
 
-run();
+locateDesignationsAcrossSchemas();
