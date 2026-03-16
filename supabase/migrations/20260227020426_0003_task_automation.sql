@@ -15,6 +15,7 @@ begin
 end;
 $$ language plpgsql;
 
+drop trigger if exists trg_tasks_updated_at on task.tasks;
 create trigger trg_tasks_updated_at
 before update on task.tasks
 for each row
@@ -53,6 +54,7 @@ begin
 end;
 $$ language plpgsql;
 
+drop trigger if exists trg_task_status_history on task.tasks;
 create trigger trg_task_status_history
 after update on task.tasks
 for each row
@@ -106,6 +108,7 @@ begin
 end;
 $$ language plpgsql;
 
+drop trigger if exists trg_create_sla on task.tasks;
 create trigger trg_create_sla
 after insert on task.tasks
 for each row
