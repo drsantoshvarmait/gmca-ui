@@ -6,6 +6,137 @@ import { callAIGateway } from "../utils/api"
 import NotificationBell from "../components/NotificationBell"
 import { Toaster, toast } from "react-hot-toast"
 
+// Styles
+const pageContainer = {
+  minHeight: "100vh",
+  background: "#f8fafc",
+  padding: "100px 40px 40px",
+  fontFamily: "'Inter', sans-serif",
+  position: "relative",
+  overflow: "hidden"
+}
+
+const navBar = {
+  position: "fixed",
+  top: "20px",
+  left: "40px",
+  right: "40px",
+  padding: "12px 24px",
+  borderRadius: "24px",
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  zIndex: 1000
+}
+
+const navBrand = { display: "flex", alignItems: "center", gap: "16px" }
+const logoBadge = {
+  width: "48px",
+  height: "48px",
+  borderRadius: "14px",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  color: "white",
+  fontWeight: "900",
+  fontSize: "18px",
+  boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
+}
+
+const navTitle = { margin: 0, fontSize: "18px", fontWeight: "800", color: "#1e293b", letterSpacing: "-0.5px" }
+const envTagBox = { display: "flex", alignItems: "center", gap: "8px" }
+const envTag = { padding: "2px 8px", borderRadius: "6px", fontSize: "10px", fontWeight: "900", color: "white", textTransform: "uppercase" }
+const orgSubTitle = { fontSize: "13px", fontWeight: "600", color: "#64748b" }
+
+const navActions = { display: "flex", alignItems: "center", gap: "24px" }
+const actionGroup = { display: "flex", alignItems: "center", gap: "12px" }
+const divider = { width: "1px", height: "30px", background: "#e2e8f0" }
+const selectInput = { padding: "8px 12px", borderRadius: "12px", border: "1px solid #e2e8f0", background: "white", fontSize: "13px", fontWeight: "600", color: "#1e293b", outline: "none", cursor: "pointer" }
+const logoutButton = { padding: "8px 20px", borderRadius: "12px", border: "none", background: "#fee2e2", color: "#991b1b", fontWeight: "700", fontSize: "13px", cursor: "pointer", transition: "all 0.2s" }
+
+const contentGrid = { display: "grid", gridTemplateColumns: "320px 1fr", gap: "40px", position: "relative", zIndex: 10 }
+
+const profileCard = { padding: "32px", borderRadius: "24px", height: "fit-content" }
+const profileTop = { display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", marginBottom: "32px" }
+const avatar = { width: "80px", height: "80px", borderRadius: "50%", background: "linear-gradient(135deg, #1e293b 0%, #334155 100%)", color: "white", fontSize: "32px", fontWeight: "800", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "16px" }
+const profileInfo = { display: "flex", flexDirection: "column", alignItems: "center" }
+const profileName = { margin: 0, fontSize: "20px", fontWeight: "800", color: "#1e293b", wordBreak: "break-all" }
+const profileRole = { margin: "8px 0 0", fontSize: "14px", fontWeight: "600", color: "#64748b" }
+const quickStats = { borderTop: "1px solid #f1f5f9", paddingTop: "24px" }
+const statItem = { display: "flex", flexDirection: "column", gap: "4px" }
+const statLabel = { fontSize: "12px", fontWeight: "700", color: "#94a3b8", textTransform: "uppercase" }
+const statValue = { fontSize: "16px", fontWeight: "800", color: "#1e293b" }
+
+const mainContent = { display: "flex", flexDirection: "column", gap: "0" }
+const sectionHeading = { fontSize: "20px", fontWeight: "800", color: "#1e293b", marginBottom: "20px", letterSpacing: "-0.5px" }
+const statsGrid = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "20px" }
+const operationsGrid = { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "16px" }
+
+const floater1 = { position: "absolute", top: "10%", left: "-5%", width: "400px", height: "400px", background: "radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, rgba(255, 255, 255, 0) 70%)", borderRadius: "50%", zIndex: 1 }
+const floater2 = { position: "absolute", bottom: "10%", right: "-5%", width: "500px", height: "500px", background: "radial-gradient(circle, rgba(99, 102, 241, 0.05) 0%, rgba(255, 255, 255, 0) 70%)", borderRadius: "50%", zIndex: 1 }
+
+const glassEffect = {
+  background: "rgba(255, 255, 255, 0.8)",
+  backdropFilter: "blur(12px)",
+  border: "1px solid rgba(255, 255, 255, 0.3)",
+  boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.07)"
+};
+
+function StatCard({ title, value, color, isAlert }) {
+  return (
+    <div style={{ 
+      background: "white", 
+      padding: "24px", 
+      borderRadius: "20px", 
+      boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)",
+      borderLeft: `6px solid ${color}`,
+      display: "flex",
+      flexDirection: "column",
+      gap: "8px"
+    }}>
+      <span style={{ fontSize: "14px", fontWeight: "600", color: "#64748b", textTransform: "uppercase", letterSpacing: "0.5px" }}>{title}</span>
+      <h2 style={{ fontSize: "32px", fontWeight: "800", color: isAlert ? "#ef4444" : "#1e293b", margin: 0 }}>{value}</h2>
+    </div>
+  )
+}
+
+function OpButton({ icon, label, onClick, color = "#3b82f6" }) {
+  return (
+    <button 
+      onClick={onClick}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "12px",
+        padding: "16px 20px",
+        background: "white",
+        border: "1px solid #e2e8f0",
+        borderRadius: "16px",
+        cursor: "pointer",
+        transition: "all 0.2s",
+        fontSize: "15px",
+        fontWeight: "700",
+        color: "#1e293b",
+        textAlign: "left",
+        boxShadow: "0 1px 2px rgba(0,0,0,0.05)"
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = "translateY(-2px)";
+        e.currentTarget.style.boxShadow = "0 10px 15px -3px rgba(0,0,0,0.1)";
+        e.currentTarget.style.borderColor = color;
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = "translateY(0)";
+        e.currentTarget.style.boxShadow = "0 1px 2px rgba(0,0,0,0.05)";
+        e.currentTarget.style.borderColor = "#e2e8f0";
+      }}
+    >
+      <span style={{ fontSize: "20px", display: "flex", alignItems: "center", justifyContent: "center", width: "40px", height: "40px", background: `${color}10`, borderRadius: "10px", color: color }}>{icon}</span>
+      {label}
+    </button>
+  )
+}
+
 export default function Dashboard() {
   const navigate = useNavigate()
   const { language, setLanguage } = useLanguage()
@@ -29,8 +160,8 @@ export default function Dashboard() {
   const [aiLoading, setAiLoading] = useState(false)
 
   const hostname = window.location.hostname;
-  const env = (import.meta.env.VITE_APP_ENV === "PROD" || hostname === "gmca-ui.vercel.app") ? "PROD" :
-              (import.meta.env.VITE_APP_ENV === "STAGING" || hostname.includes("staging.vercel.app")) ? "STAGING" : 
+  const env = (window.location.hostname.includes("staging.vercel.app") || import.meta.env.VITE_APP_ENV === "STAGING") ? "STAGING" : 
+              (window.location.hostname === "gmca-ui.vercel.app" || import.meta.env.VITE_APP_ENV === "PROD") ? "PROD" : 
               (import.meta.env.VITE_APP_ENV || "LOCAL");
 
   useEffect(() => {
@@ -201,12 +332,6 @@ export default function Dashboard() {
   }
 
   const brandColor = tenantData?.settings?.brand_color || "#3b82f6";
-  const glassEffect = {
-    background: "rgba(255, 255, 255, 0.8)",
-    backdropFilter: "blur(12px)",
-    border: "1px solid rgba(255, 255, 255, 0.3)",
-    boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.07)"
-  };
 
   if (loadingContext) {
     return (
@@ -218,6 +343,7 @@ export default function Dashboard() {
 
   return (
     <div style={pageContainer}>
+      <Toaster position="top-right" />
       
       {/* Background Floaters */}
       <div style={floater1}></div>
@@ -325,127 +451,3 @@ export default function Dashboard() {
     </div>
   )
 }
-
-function StatCard({ title, value, color, isAlert }) {
-  return (
-    <div style={{ 
-      background: "white", 
-      padding: "24px", 
-      borderRadius: "20px", 
-      boxShadow: "0 4px 6px -1px rgba(0,0,0,0.05)",
-      borderLeft: `6px solid ${color}`,
-      display: "flex",
-      flexDirection: "column",
-      gap: "8px"
-    }}>
-      <span style={{ fontSize: "14px", fontWeight: "600", color: "#64748b", textTransform: "uppercase", letterSpacing: "0.5px" }}>{title}</span>
-      <h2 style={{ fontSize: "32px", fontWeight: "800", color: isAlert ? "#ef4444" : "#1e293b", margin: 0 }}>{value}</h2>
-    </div>
-  )
-}
-
-function OpButton({ icon, label, onClick, color = "#3b82f6" }) {
-  return (
-    <button 
-      onClick={onClick}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: "12px",
-        padding: "16px 20px",
-        background: "white",
-        border: "1px solid #e2e8f0",
-        borderRadius: "16px",
-        cursor: "pointer",
-        transition: "all 0.2s",
-        fontSize: "15px",
-        fontWeight: "700",
-        color: "#1e293b",
-        textAlign: "left",
-        boxShadow: "0 1px 2px rgba(0,0,0,0.05)"
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.transform = "translateY(-2px)";
-        e.currentTarget.style.boxShadow = "0 10px 15px -3px rgba(0,0,0,0.1)";
-        e.currentTarget.style.borderColor = color;
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.transform = "translateY(0)";
-        e.currentTarget.style.boxShadow = "0 1px 2px rgba(0,0,0,0.05)";
-        e.currentTarget.style.borderColor = "#e2e8f0";
-      }}
-    >
-      <span style={{ fontSize: "20px", display: "flex", alignItems: "center", justifyContent: "center", width: "40px", height: "40px", background: `${color}10`, borderRadius: "10px", color: color }}>{icon}</span>
-      {label}
-    </button>
-  )
-}
-
-// Styles
-const pageContainer = {
-  minHeight: "100vh",
-  background: "#f8fafc",
-  padding: "100px 40px 40px",
-  fontFamily: "'Inter', sans-serif",
-  position: "relative",
-  overflow: "hidden"
-}
-
-const navBar = {
-  position: "fixed",
-  top: "20px",
-  left: "40px",
-  right: "40px",
-  padding: "12px 24px",
-  borderRadius: "24px",
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  zIndex: 1000
-}
-
-const navBrand = { display: "flex", alignItems: "center", gap: "16px" }
-const logoBadge = {
-  width: "48px",
-  height: "48px",
-  borderRadius: "14px",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  color: "white",
-  fontWeight: "900",
-  fontSize: "18px",
-  boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
-}
-
-const navTitle = { margin: 0, fontSize: "18px", fontWeight: "800", color: "#1e293b", letterSpacing: "-0.5px" }
-const envTagBox = { display: "flex", alignItems: "center", gap: "8px" }
-const envTag = { padding: "2px 8px", borderRadius: "6px", fontSize: "10px", fontWeight: "900", color: "white", textTransform: "uppercase" }
-const orgSubTitle = { fontSize: "13px", fontWeight: "600", color: "#64748b" }
-
-const navActions = { display: "flex", alignItems: "center", gap: "24px" }
-const actionGroup = { display: "flex", alignItems: "center", gap: "12px" }
-const divider = { width: "1px", height: "30px", background: "#e2e8f0" }
-const selectInput = { padding: "8px 12px", borderRadius: "12px", border: "1px solid #e2e8f0", background: "white", fontSize: "13px", fontWeight: "600", color: "#1e293b", outline: "none", cursor: "pointer" }
-const logoutButton = { padding: "8px 20px", borderRadius: "12px", border: "none", background: "#fee2e2", color: "#991b1b", fontWeight: "700", fontSize: "13px", cursor: "pointer", transition: "all 0.2s" }
-
-const contentGrid = { display: "grid", gridTemplateColumns: "320px 1fr", gap: "40px", position: "relative", zIndex: 10 }
-
-const profileCard = { padding: "32px", borderRadius: "24px", height: "fit-content" }
-const profileTop = { display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", marginBottom: "32px" }
-const avatar = { width: "80px", height: "80px", borderRadius: "50%", background: "linear-gradient(135deg, #1e293b 0%, #334155 100%)", color: "white", fontSize: "32px", fontWeight: "800", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "16px" }
-const profileInfo = { display: "flex", flexDirection: "column", alignItems: "center" }
-const profileName = { margin: 0, fontSize: "20px", fontWeight: "800", color: "#1e293b", wordBreak: "break-all" }
-const profileRole = { margin: "8px 0 0", fontSize: "14px", fontWeight: "600", color: "#64748b" }
-const quickStats = { borderTop: "1px solid #f1f5f9", paddingTop: "24px" }
-const statItem = { display: "flex", flexDirection: "column", gap: "4px" }
-const statLabel = { fontSize: "12px", fontWeight: "700", color: "#94a3b8", textTransform: "uppercase" }
-const statValue = { fontSize: "16px", fontWeight: "800", color: "#1e293b" }
-
-const mainContent = { display: "flex", flexDirection: "column", gap: "0" }
-const sectionHeading = { fontSize: "20px", fontWeight: "800", color: "#1e293b", marginBottom: "20px", letterSpacing: "-0.5px" }
-const statsGrid = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "20px" }
-const operationsGrid = { display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "16px" }
-
-const floater1 = { position: "absolute", top: "10%", left: "-5%", width: "400px", height: "400px", background: "radial-gradient(circle, rgba(59, 130, 246, 0.05) 0%, rgba(255, 255, 255, 0) 70%)", borderRadius: "50%", zIndex: 1 }
-const floater2 = { position: "absolute", bottom: "10%", right: "-5%", width: "500px", height: "500px", background: "radial-gradient(circle, rgba(99, 102, 241, 0.05) 0%, rgba(255, 255, 255, 0) 70%)", borderRadius: "50%", zIndex: 1 }

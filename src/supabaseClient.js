@@ -1,8 +1,8 @@
 import { createClient } from "@supabase/supabase-js"
 
 const hostname = window.location.hostname;
-const isProd = import.meta.env.VITE_APP_ENV === "PROD" || hostname === "gmca-ui.vercel.app";
-const isStaging = import.meta.env.VITE_APP_ENV === "STAGING" || hostname.includes("staging.vercel.app");
+const isStaging = hostname.includes("staging.vercel.app") || import.meta.env.VITE_APP_ENV === "STAGING";
+const isProd = (hostname === "gmca-ui.vercel.app" || import.meta.env.VITE_APP_ENV === "PROD") && !isStaging;
 
 let supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 let supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
