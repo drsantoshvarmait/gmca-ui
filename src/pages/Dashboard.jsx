@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import { supabase } from "../supabaseClient"
 import { useLanguage } from "../context/LanguageContext"
 import { callAIGateway } from "../utils/api"
@@ -139,6 +139,7 @@ function OpButton({ icon, label, onClick, color = "#3b82f6" }) {
 
 export default function Dashboard() {
   const navigate = useNavigate()
+  const { contextCode } = useParams()
   const { language, setLanguage } = useLanguage()
   const [stats, setStats] = useState({
     totalSubjects: 0,
@@ -223,6 +224,21 @@ export default function Dashboard() {
 
     if (data && data.length > 0) {
       setOrgList(data)
+      
+      // PRIORITY 1: Check URL contextCode
+      if (contextCode) {
+        const urlMatch = data.find(o => 
+          o.organisations?.organisation_code === contextCode || 
+          // Match tenant code if provided 
+          (o.organisations?.tenant_id && contextCode === "MEDD") // Simplified for now
+        )
+        if (urlMatch) {
+          setActiveOrgId(urlMatch.organisation_id)
+          return
+        }
+      }
+
+      // PRIORITY 2: Check localStorage
       const storedActive = localStorage.getItem("active_org_id")
       const initialOrg = storedActive && data.find(o => o.organisation_id === storedActive)
         ? storedActive
@@ -309,10 +325,11 @@ export default function Dashboard() {
   }
 
   async function logout() {
+    const tCode = tenantData?.tenant_code;
     await supabase.auth.signOut()
     localStorage.removeItem("user_orgs")
     localStorage.removeItem("active_org_id")
-    navigate("/login")
+    navigate(tCode ? `/login?tenant=${tCode}` : "/login")
   }
 
   async function changeLanguage(newLang) {
@@ -327,6 +344,13 @@ export default function Dashboard() {
   }
 
   function handleOrgChange(newOrgId) {
+    const org = orgList.find(o => o.organisation_id === newOrgId)
+    if (org) {
+       const code = org.organisations?.organisation_code;
+       if (code) {
+         navigate(`/${code}/dashboard`, { replace: true })
+       }
+    }
     localStorage.setItem("active_org_id", newOrgId)
     setActiveOrgId(newOrgId)
   }
@@ -435,14 +459,14 @@ export default function Dashboard() {
           <section style={{ marginTop: "40px" }}>
             <h3 style={sectionHeading}>Priority Operations</h3>
             <div style={operationsGrid}>
-               <OpButton icon="➕" label="Draft Letter" onClick={() => navigate("/submit-letter")} />
-               <OpButton icon="📥" label="Workflow Inbox" onClick={() => navigate("/workflow-inbox")} color="#8b5cf6" />
-               <OpButton icon="📁" label="Subject Explorer" onClick={() => navigate("/communications")} />
-               <OpButton icon="🏛" label="Org Directory" onClick={() => navigate("/departments")} />
+               <OpButton icon="➕" label="Draft Letter" onClick={() => navigate(contextCode ? `/${contextCode}/submit-letter` : "/submit-letter")} />
+               <OpButton icon="📥" label="Workflow Inbox" onClick={() => navigate(contextCode ? `/${contextCode}/workflow-inbox` : "/workflow-inbox")} color="#8b5cf6" />
+               <OpButton icon="📁" label="Subject Explorer" onClick={() => navigate(contextCode ? `/${contextCode}/communications` : "/communications")} />
+               <OpButton icon="🏛" label="Org Directory" onClick={() => navigate(contextCode ? `/${contextCode}/departments` : "/departments")} />
                <OpButton icon="⚙" label="Admin Console" onClick={() => navigate("/superadmin-console")} color="#1e293b" />
-               <OpButton icon="🛒" label="Procurement" onClick={() => navigate("/procurement")} color="#06b6d4" />
-               <OpButton icon="💰" label="Finance" onClick={() => navigate("/finance")} color="#10b981" />
-               <OpButton icon="📤" label="Outbox" onClick={() => navigate("/outbox")} />
+               <OpButton icon="🛒" label="Procurement" onClick={() => navigate(contextCode ? `/${contextCode}/procurement` : "/procurement")} color="#06b6d4" />
+               <OpButton icon="💰" label="Finance" onClick={() => navigate(contextCode ? `/${contextCode}/finance` : "/finance")} color="#10b981" />
+               <OpButton icon="📤" label="Outbox" onClick={() => navigate(contextCode ? `/${contextCode}/outbox` : "/outbox")} />
                <OpButton icon="🧠" label={aiLoading ? "Thinking..." : "AI Gateway"} onClick={testAI} color="#ec4899" />
             </div>
           </section>

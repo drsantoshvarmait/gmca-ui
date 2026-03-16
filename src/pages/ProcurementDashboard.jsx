@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "../supabaseClient";
 import { toast, Toaster } from "react-hot-toast";
 
 export default function ProcurementDashboard() {
     const navigate = useNavigate();
+    const { contextCode } = useParams();
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState({
         pendingPRs: 5,
@@ -30,8 +30,8 @@ export default function ProcurementDashboard() {
                     <p style={subtitle}>Manage requisitions, purchase orders, and vendor ecosystems.</p>
                 </div>
                 <div style={buttonGroup}>
-                    <button style={secondaryBtn} onClick={() => navigate("/finance")}>CoA / Finance</button>
-                    <button style={primaryBtn} onClick={() => navigate("/procurement/new-requisition")}>+ New Requisition</button>
+                    <button style={secondaryBtn} onClick={() => navigate(contextCode ? `/${contextCode}/finance` : "/finance")}>CoA / Finance</button>
+                    <button style={primaryBtn} onClick={() => navigate(contextCode ? `/${contextCode}/procurement/new-requisition` : "/procurement/new-requisition")}>+ New Requisition</button>
                 </div>
             </div>
 
@@ -48,13 +48,13 @@ export default function ProcurementDashboard() {
                 {/* Left Column: Explorer */}
                 <div style={explorerCard}>
                     <h3 style={sectionTitle}>Procurement Explorer</h3>
-                     <div style={menuList}>
-                        <MenuLink icon="📦" label="Item Master" description="Statutory item catalog & budget mapping" onClick={() => navigate("/procurement/item-master")} />
-                        <MenuLink icon="🏬" label="Vendor Master" description="Centralized supplier directory" onClick={() => navigate("/procurement/vendor-master")} />
-                        <MenuLink icon="📋" label="Purchase Requisitions" description="Manage internal requests" onClick={() => navigate("/procurement/new-requisition")} />
+                      <div style={menuList}>
+                        <MenuLink icon="📦" label="Item Master" description="Statutory item catalog & budget mapping" onClick={() => navigate(contextCode ? `/${contextCode}/procurement/item-master` : "/procurement/item-master")} />
+                        <MenuLink icon="🏬" label="Vendor Master" description="Centralized supplier directory" onClick={() => navigate(contextCode ? `/${contextCode}/procurement/vendor-master` : "/procurement/vendor-master")} />
+                        <MenuLink icon="📋" label="Purchase Requisitions" description="Manage internal requests" onClick={() => navigate(contextCode ? `/${contextCode}/procurement/new-requisition` : "/procurement/new-requisition")} />
                         <MenuLink icon="🛒" label="Purchase Orders" description="Tracking formal commitments" active />
-                        <MenuLink icon="🚚" label="Goods Receipt (GRN)" description="Inventory intake & QC" onClick={() => navigate("/procurement/goods-receipt")} />
-                        <MenuLink icon="🔢" label="CoA Master" description="Standard statutory heads" onClick={() => navigate("/finance/coa")} />
+                        <MenuLink icon="🚚" label="Goods Receipt (GRN)" description="Inventory intake & QC" onClick={() => navigate(contextCode ? `/${contextCode}/procurement/goods-receipt` : "/procurement/goods-receipt")} />
+                        <MenuLink icon="🔢" label="CoA Master" description="Standard statutory heads" onClick={() => navigate(contextCode ? `/${contextCode}/finance/coa` : "/finance/coa")} />
                     </div>
                 </div>
 

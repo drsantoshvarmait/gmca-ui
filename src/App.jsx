@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react"
-import { Routes, Route, useNavigate, useLocation } from "react-router-dom"
+import { Routes, Route, useNavigate, useLocation, useParams } from "react-router-dom"
 import { supabase } from "./supabaseClient"
 
 import Login from "./pages/Login"
@@ -118,7 +118,12 @@ function App() {
         >
           <div
             style={{ cursor: "pointer", fontWeight: "bold" }}
-            onClick={() => navigate("/dashboard")}
+            onClick={() => {
+              // Try to find context code from URL if possible
+              const parts = location.pathname.split('/');
+              const context = parts[1] && !['login', 'signup', 'superadmin-console', 'admin'].includes(parts[1]) ? parts[1] : '';
+              navigate(context ? `/${context}/dashboard` : "/dashboard");
+            }}
           >
             Governance System v2.2 [SYNC_OK]
           </div>
@@ -156,7 +161,7 @@ function App() {
         <Route path="/reset-password" element={<ResetPassword />} />
 
 
-        {/* DASHBOARD */}
+        {/* REDIRECTS / DASHBOARD */}
 
         <Route
           path="/"
@@ -168,9 +173,77 @@ function App() {
           element={<ProtectedRoute><Dashboard /></ProtectedRoute>}
         />
 
+        <Route path="/:contextCode">
+          <Route
+            path="dashboard"
+            element={<ProtectedRoute><Dashboard /></ProtectedRoute>}
+          />
 
-        {/* COMMUNICATION SYSTEM */}
+          {/* COMMUNICATION SYSTEM */}
+          <Route
+            path="submit-letter"
+            element={<ProtectedRoute><SubmitLetter /></ProtectedRoute>}
+          />
 
+          <Route
+            path="outbox"
+            element={<ProtectedRoute><Outbox /></ProtectedRoute>}
+          />
+
+          <Route
+            path="communications"
+            element={<ProtectedRoute><Communications /></ProtectedRoute>}
+          />
+
+          <Route
+            path="communication/:id"
+            element={<ProtectedRoute><CommunicationDetails /></ProtectedRoute>}
+          />
+
+          {/* ADMIN MODULES */}
+          <Route
+            path="departments"
+            element={<ProtectedRoute><DepartmentsPage /></ProtectedRoute>}
+          />
+
+          <Route
+            path="designations"
+            element={<ProtectedRoute><DesignationView /></ProtectedRoute>}
+          />
+
+          <Route
+            path="admin/workflows"
+            element={<ProtectedRoute><AdminWorkflows /></ProtectedRoute>}
+          />
+
+          <Route
+            path="admin/organizations"
+            element={<ProtectedRoute><AdminOrganizations /></ProtectedRoute>}
+          />
+
+          {/* WORKFLOW ENGINE */}
+          <Route
+            path="workflow-inbox"
+            element={<ProtectedRoute><WorkflowInbox /></ProtectedRoute>}
+          />
+
+          <Route
+            path="finance"
+            element={<ProtectedRoute><FinanceDashboard /></ProtectedRoute>}
+          />
+
+          <Route
+            path="procurement"
+            element={<ProtectedRoute><ProcurementDashboard /></ProtectedRoute>}
+          />
+          
+          <Route
+            path="procurement/new-requisition"
+            element={<ProtectedRoute><PurchaseRequisitionForm /></ProtectedRoute>}
+          />
+        </Route>
+
+        {/* REMAINING LEGACY ROUTES FOR COMPATIBILITY */}
         <Route
           path="/submit-letter"
           element={<ProtectedRoute><SubmitLetter /></ProtectedRoute>}

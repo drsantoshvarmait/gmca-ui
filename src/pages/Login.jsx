@@ -87,7 +87,12 @@ export default function Login() {
       return
     }
 
-    navigate("/dashboard")
+    const redirectCode = orgCode || tenantCode;
+    if (redirectCode) {
+      navigate(`/${redirectCode}/dashboard`)
+    } else {
+      navigate("/dashboard")
+    }
   }
 
   // Dynamic Styles based on Tenant

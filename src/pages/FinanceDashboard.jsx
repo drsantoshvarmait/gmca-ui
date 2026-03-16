@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "../supabaseClient";
 import { Toaster, toast } from "react-hot-toast";
 
 export default function FinanceDashboard() {
     const navigate = useNavigate();
+    const { contextCode } = useParams();
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState({
         totalBudget: 0,
@@ -77,7 +77,7 @@ export default function FinanceDashboard() {
                     <p style={subtitle}>Monitor allocations and spending across your organization.</p>
                 </div>
                 <div style={{ display: "flex", gap: "12px" }}>
-                    <button style={secondaryBtn} onClick={() => navigate("/dashboard")}>Back to Home</button>
+                    <button style={secondaryBtn} onClick={() => navigate(contextCode ? `/${contextCode}/dashboard` : "/dashboard")}>Back to Home</button>
                     <button style={primaryBtn}>+ Add Allocation</button>
                 </div>
             </div>
