@@ -463,7 +463,7 @@ export default function Dashboard() {
                <OpButton icon="📥" label="Workflow Inbox" onClick={() => navigate(contextCode ? `/${contextCode}/workflow-inbox` : "/workflow-inbox")} color="#8b5cf6" />
                <OpButton icon="📁" label="Subject Explorer" onClick={() => navigate(contextCode ? `/${contextCode}/communications` : "/communications")} />
                <OpButton icon="🏛" label="Org Directory" onClick={() => navigate(contextCode ? `/${contextCode}/departments` : "/departments")} />
-               <OpButton icon="⚙" label="Admin Console" onClick={() => navigate("/superadmin-console")} color="#1e293b" />
+               <OpButton icon="⚙" label="Admin Console" onClick={() => navigate(contextCode ? `/${contextCode}/admin-console` : "/superadmin-console")} color="#1e293b" />
                <OpButton icon="🛒" label="Procurement" onClick={() => navigate(contextCode ? `/${contextCode}/procurement` : "/procurement")} color="#06b6d4" />
                <OpButton icon="💰" label="Finance" onClick={() => navigate(contextCode ? `/${contextCode}/finance` : "/finance")} color="#10b981" />
                <OpButton icon="📤" label="Outbox" onClick={() => navigate(contextCode ? `/${contextCode}/outbox` : "/outbox")} />

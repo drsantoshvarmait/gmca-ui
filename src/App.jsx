@@ -221,6 +221,16 @@ function App() {
             element={<ProtectedRoute><AdminOrganizations /></ProtectedRoute>}
           />
 
+          <Route
+            path="admin-console"
+            element={<ProtectedRoute><AdminConsole /></ProtectedRoute>}
+          />
+
+          <Route
+            path="workflow-builder/:id"
+            element={<ProtectedRoute><WorkflowBuilder /></ProtectedRoute>}
+          />
+
           {/* WORKFLOW ENGINE */}
           <Route
             path="workflow-inbox"

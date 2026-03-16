@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react"
+import { useParams } from "react-router-dom"
 import { adminModules } from "./admin/adminModules"
 import { supabase } from "../supabaseClient"
 
 export default function AdminConsole() {
+  const { contextCode } = useParams();
 
   const [context, setContext] = useState({ isMedicalCollege: false, userRole: null });
   const [loadingContext, setLoadingContext] = useState(true);
@@ -134,7 +136,7 @@ export default function AdminConsole() {
             color: "#1e293b",
             letterSpacing: "-0.025em"
           }}>
-            Super Admin Console
+            {contextCode ? `${contextCode} Admin Console` : "Super Admin Console"}
           </h1>
           <span style={{
             backgroundColor: env === "PROD" ? "#ef4444" :

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { supabase } from "../../supabaseClient"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useParams } from "react-router-dom"
 import { toast, Toaster } from "react-hot-toast"
 
 export default function AdminWorkflows() {
@@ -8,6 +8,7 @@ export default function AdminWorkflows() {
   const [activeTab, setActiveTab] = useState("MINE") // "MINE" or "GLOBAL"
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
+  const { contextCode } = useParams();
 
   async function handleCreateNew() {
     const newName = prompt("Enter a name for the new workflow:")
@@ -30,7 +31,7 @@ export default function AdminWorkflows() {
 
       if (error) throw error
       toast.success("Workflow created!", { id: loadingToast })
-      navigate(`/workflow-builder/${data.workflow_id}`)
+      navigate(contextCode ? `/${contextCode}/workflow-builder/${data.workflow_id}` : `/workflow-builder/${data.workflow_id}`)
     } catch (err) {
       toast.error("Creation failed: " + err.message, { id: loadingToast })
     }
@@ -210,7 +211,7 @@ export default function AdminWorkflows() {
                     <div style={{ display: "flex", gap: "8px" }}>
                       {/* Show Edit only if it belongs to the user OR it's a global template and we are in the GLOBAL tab (Admin usage) */}
                       {(activeTab === "MINE" || activeTab === "GLOBAL") && (
-                        <button style={actionBtnStyle} onClick={() => navigate(`/workflow-builder/${w.workflow_id}`)}>Edit</button>
+                        <button style={actionBtnStyle} onClick={() => navigate(contextCode ? `/${contextCode}/workflow-builder/${w.workflow_id}` : `/workflow-builder/${w.workflow_id}`)}>Edit</button>
                       )}
 
                       {/* Everyone can clone templates OR their own workflows to create variations */}

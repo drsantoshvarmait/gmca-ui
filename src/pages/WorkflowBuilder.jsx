@@ -12,7 +12,7 @@ import { useParams, useNavigate } from "react-router-dom"
 import { toast, Toaster } from "react-hot-toast"
 
 export default function WorkflowBuilder() {
-  const { id } = useParams(); // gets workflow ID from URL
+  const { id, contextCode } = useParams(); // gets workflow ID from URL
   const navigate = useNavigate();
 
   const [nodes, setNodes] = useState([]);
@@ -265,7 +265,7 @@ export default function WorkflowBuilder() {
 
         <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
           <button
-            onClick={() => navigate("/superadmin-console")}
+            onClick={() => navigate(contextCode ? `/${contextCode}/admin-console` : "/superadmin-console")}
             style={{
               padding: "8px 12px",
               backgroundColor: "#f1f5f9",
