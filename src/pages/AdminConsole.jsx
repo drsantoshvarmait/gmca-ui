@@ -50,7 +50,7 @@ export default function AdminConsole() {
             ...m,
             subModules: m.subModules.filter(sm => {
                 if (typeof sm.visibility === 'function') {
-                    return sm.visibility(context);
+                    return sm.visibility({ ...context, contextCode });
                 }
                 return true;
             })

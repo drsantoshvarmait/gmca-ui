@@ -30,7 +30,18 @@ export const adminModules = [
     id: "masters",
     label: "Masters",
     subModules: [
-      { id: "tenants", label: "Tenants", component: SuperTenantManager },
+      { 
+        id: "tenants", 
+        label: "Tenants", 
+        component: SuperTenantManager,
+        visibility: (ctx) => !ctx.contextCode 
+      },
+      { 
+        id: "organisations", 
+        label: "Affiliated Organisations", 
+        component: OrganisationManagement,
+        visibility: (ctx) => !!ctx.contextCode 
+      },
       { id: "spaces", label: "Organisation Types", component: SpacesManager },
       { id: "unit_masters", label: "Units", component: UnitMasterManager },
       { id: "sub_unit_masters", label: "Sub-Units", component: SubUnitMasterManager },
