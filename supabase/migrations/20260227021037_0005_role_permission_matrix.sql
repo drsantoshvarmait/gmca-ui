@@ -7,7 +7,7 @@
 -- 1️⃣ PERMISSIONS MASTER TABLE
 -- =====================================================
 
-create table core.permissions (
+create table if not exists core.permissions (
     permission_id uuid primary key default gen_random_uuid(),
     permission_code text not null unique,
     module text not null,
@@ -16,14 +16,18 @@ create table core.permissions (
     created_at timestamptz not null default now()
 );
 
-create index idx_permissions_module on core.permissions(module);
+do $$ begin
+    if not exists (select 1 from pg_indexes where indexname = 'idx_permissions_module') then
+        create index idx_permissions_module on core.permissions(module);
+    end if;
+end $$;
 
 
 -- =====================================================
 -- 2️⃣ ROLE-PERMISSION MAPPING
 -- =====================================================
 
-create table core.role_permissions (
+create table if not exists core.role_permissions (
     role_id uuid not null
         references core.roles(role_id) on delete cascade,
 
@@ -66,11 +70,13 @@ $$ language plpgsql stable;
 alter table core.permissions enable row level security;
 alter table core.role_permissions enable row level security;
 
+drop policy if exists tenant_permission_isolation on core.role_permissions;
 create policy tenant_permission_isolation
 on core.role_permissions
 for all
 using (true);
 
+drop policy if exists tenant_permission_read on core.permissions;
 create policy tenant_permission_read
 on core.permissions
 for select
