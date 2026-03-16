@@ -153,7 +153,7 @@ end $$;
 -- =====================================================
 -- ESCALATIONS
 -- =====================================================
-create table task.task_escalations (
+create table if not exists task.task_escalations (
     id uuid primary key default gen_random_uuid(),
 
     tenant_id uuid not null
@@ -171,8 +171,11 @@ create table task.task_escalations (
     escalated_at timestamptz not null default now()
 );
 
-create index idx_task_escalations_task
-    on task.task_escalations(task_id);
+do $$ begin
+    if not exists (select 1 from pg_indexes where indexname = 'idx_task_escalations_task') then
+        create index idx_task_escalations_task on task.task_escalations(task_id);
+    end if;
+end $$;
 
 
 -- =====================================================
