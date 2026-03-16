@@ -439,7 +439,7 @@ export default function Dashboard() {
                <OpButton icon="📥" label="Workflow Inbox" onClick={() => navigate("/workflow-inbox")} color="#8b5cf6" />
                <OpButton icon="📁" label="Subject Explorer" onClick={() => navigate("/communications")} />
                <OpButton icon="🏛" label="Org Directory" onClick={() => navigate("/departments")} />
-               <OpButton icon="⚙" label="Admin Console" onClick={() => navigate("/admin-console")} color="#1e293b" />
+               <OpButton icon="⚙" label="Admin Console" onClick={() => navigate("/superadmin-console")} color="#1e293b" />
                <OpButton icon="🛒" label="Procurement" onClick={() => navigate("/procurement")} color="#06b6d4" />
                <OpButton icon="💰" label="Finance" onClick={() => navigate("/finance")} color="#10b981" />
                <OpButton icon="📤" label="Outbox" onClick={() => navigate("/outbox")} />

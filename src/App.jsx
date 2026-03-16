@@ -195,7 +195,7 @@ function App() {
         {/* ADMIN CONSOLE */}
 
         <Route
-          path="/admin-console"
+          path="/superadmin-console"
           element={<ProtectedRoute><AdminConsole /></ProtectedRoute>}
         />
 

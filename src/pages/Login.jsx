@@ -12,28 +12,54 @@ export default function Login() {
   const [message, setMessage] = useState("")
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const tenantCode = searchParams.get("tenant")
+  const tenantCodeFromSimple = searchParams.get("tenant")
+  const tenantOrgCode = searchParams.get("tenant-Org")
+  
+  // Logic to determine which code to use
+  let tenantCode = tenantCodeFromSimple;
+  let orgCode = null;
+
+  if (tenantOrgCode && tenantOrgCode.includes("-")) {
+    const parts = tenantOrgCode.split("-");
+    tenantCode = parts[0];
+    orgCode = parts[1];
+  }
 
   useEffect(() => {
     if (tenantCode) {
-      fetchTenantDetails()
+      fetchTenantDetails(tenantCode, orgCode)
     }
-  }, [tenantCode])
+  }, [tenantCode, orgCode])
 
-  async function fetchTenantDetails() {
+  async function fetchTenantDetails(tCode, oCode) {
     setFetchingTenant(true)
-    const { data, error } = await supabase
+    
+    // Fetch Tenant
+    const { data: tData, error: tError } = await supabase
       .from("tenants")
       .select("*")
-      .eq("tenant_code", tenantCode)
+      .eq("tenant_code", tCode)
       .single()
 
-    if (error) {
-      console.error("Error fetching tenant:", error)
-      // Allow general login if tenant not found, but toast a warning
+    if (tError) {
+      console.error("Error fetching tenant:", tError)
       toast.error("Tenant configuration not found. Using default portal.")
     } else {
-      setTenantData(data)
+      // If oCode is provided, we can fetch org specific branding later if needed
+      // For now, we update the title/data
+      if (oCode) {
+        // Optional: Fetch org name to show "Login to {OrgName} ({TenantName})"
+        const { data: oData } = await supabase
+           .from("organisations")
+           .select("organisation_name")
+           .eq("organisation_code", oCode)
+           .single();
+        
+        if (oData) {
+          tData.tenant_name = `${oData.organisation_name} (${tData.tenant_name})`;
+        }
+      }
+      setTenantData(tData)
     }
     setFetchingTenant(false)
   }

@@ -265,7 +265,7 @@ export default function WorkflowBuilder() {
 
         <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
           <button
-            onClick={() => navigate("/admin-console")}
+            onClick={() => navigate("/superadmin-console")}
             style={{
               padding: "8px 12px",
               backgroundColor: "#f1f5f9",
