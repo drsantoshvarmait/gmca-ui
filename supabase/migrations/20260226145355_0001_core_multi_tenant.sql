@@ -18,7 +18,7 @@ create schema if not exists audit;
 -- TENANTS
 -- =========================================
 
-create table core.tenants (
+create table if not exists core.tenants (
     tenant_id uuid primary key default gen_random_uuid(),
     tenant_name text not null,
     tenant_code text not null unique,
@@ -34,7 +34,7 @@ create table core.tenants (
 -- ROLES
 -- =========================================
 
-create table core.roles (
+create table if not exists core.roles (
     role_id uuid primary key default gen_random_uuid(),
     role_name text not null,
     role_scope text not null
@@ -46,7 +46,7 @@ create table core.roles (
 -- APP USERS (linked to auth.users)
 -- =========================================
 
-create table core.app_users (
+create table if not exists core.app_users (
     user_id uuid primary key references auth.users(id) on delete cascade,
     tenant_id uuid not null references core.tenants(tenant_id) on delete cascade,
     role_id uuid not null references core.roles(role_id),
@@ -55,13 +55,17 @@ create table core.app_users (
     updated_at timestamptz
 );
 
-create index idx_app_users_tenant on core.app_users(tenant_id);
+do $$ begin
+    if not exists (select 1 from pg_indexes where indexname = 'idx_app_users_tenant') then
+        create index idx_app_users_tenant on core.app_users(tenant_id);
+    end if;
+end $$;
 
 -- =========================================
 -- AUDIT LOGS
 -- =========================================
 
-create table audit.audit_logs (
+create table if not exists audit.audit_logs (
     audit_id uuid primary key default gen_random_uuid(),
     tenant_id uuid,
     table_name text not null,
@@ -74,7 +78,11 @@ create table audit.audit_logs (
     changed_at timestamptz not null default now()
 );
 
-create index idx_audit_tenant on audit.audit_logs(tenant_id);
+do $$ begin
+    if not exists (select 1 from pg_indexes where indexname = 'idx_audit_tenant') then
+        create index idx_audit_tenant on audit.audit_logs(tenant_id);
+    end if;
+end $$;
 
 -- =========================================
 -- ROW LEVEL SECURITY
@@ -87,22 +95,26 @@ alter table audit.audit_logs enable row level security;
 
 -- Basic tenant isolation policy (JWT must contain tenant_id claim)
 
+drop policy if exists tenant_isolation_tenants on core.tenants;
 create policy tenant_isolation_tenants
 on core.tenants
 for all
 using (tenant_id = (auth.jwt() ->> 'tenant_id')::uuid);
 
+drop policy if exists tenant_isolation_users on core.app_users;
 create policy tenant_isolation_users
 on core.app_users
 for all
 using (tenant_id = (auth.jwt() ->> 'tenant_id')::uuid);
 
+drop policy if exists tenant_isolation_audit on audit.audit_logs;
 create policy tenant_isolation_audit
 on audit.audit_logs
 for all
 using (tenant_id = (auth.jwt() ->> 'tenant_id')::uuid);
 
 -- Roles table can be global read-only for now
+drop policy if exists roles_read_all on core.roles;
 create policy roles_read_all
 on core.roles
 for select

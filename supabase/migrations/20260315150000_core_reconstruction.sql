@@ -39,6 +39,11 @@ ALTER TABLE public.organisation_types ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.organisations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.units_master ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Allow public read types" ON public.organisation_types;
 CREATE POLICY "Allow public read types" ON public.organisation_types FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Allow public read units" ON public.units_master;
 CREATE POLICY "Allow public read units" ON public.units_master FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Tenant isolation orgs" ON public.organisations;
 CREATE POLICY "Tenant isolation orgs" ON public.organisations FOR ALL USING (tenant_id = (auth.jwt() ->> 'tenant_id')::uuid);
