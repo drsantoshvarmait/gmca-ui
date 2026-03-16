@@ -181,24 +181,31 @@ ALTER TABLE procurement.purchase_orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE procurement.audit_trail ENABLE ROW LEVEL SECURITY;
 
 -- 4. TENANT ISOLATION POLICIES
+DROP POLICY IF EXISTS tenant_isolation_coa ON finance.chart_of_accounts;
 CREATE POLICY tenant_isolation_coa ON finance.chart_of_accounts
 FOR ALL USING (tenant_id = (auth.jwt() ->> 'tenant_id')::uuid);
 
+DROP POLICY IF EXISTS tenant_isolation_vendors ON procurement.tenant_vendors;
 CREATE POLICY tenant_isolation_vendors ON procurement.tenant_vendors
 FOR ALL USING (tenant_id = (auth.jwt() ->> 'tenant_id')::uuid);
 
+DROP POLICY IF EXISTS tenant_isolation_pr ON procurement.purchase_requisitions;
 CREATE POLICY tenant_isolation_pr ON procurement.purchase_requisitions
 FOR ALL USING (tenant_id = (auth.jwt() ->> 'tenant_id')::uuid);
 
+DROP POLICY IF EXISTS tenant_isolation_po ON procurement.purchase_orders;
 CREATE POLICY tenant_isolation_po ON procurement.purchase_orders
 FOR ALL USING (tenant_id = (auth.jwt() ->> 'tenant_id')::uuid);
 
+DROP POLICY IF EXISTS tenant_isolation_audit ON procurement.audit_trail;
 CREATE POLICY tenant_isolation_audit ON procurement.audit_trail
 FOR ALL USING (tenant_id = (auth.jwt() ->> 'tenant_id')::uuid);
 
 -- Global Master Visibility (Readable by all, writable only by system/global role)
+DROP POLICY IF EXISTS global_read_vendors ON procurement.vendors;
 CREATE POLICY global_read_vendors ON procurement.vendors
 FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS global_read_hsn ON procurement.hsn_sac_master;
 CREATE POLICY global_read_hsn ON procurement.hsn_sac_master
 FOR SELECT USING (true);

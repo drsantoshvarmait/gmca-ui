@@ -18,11 +18,13 @@ create table if not exists public.meta_docs (
 alter table public.meta_docs enable row level security;
 
 -- Policies
+drop policy if exists "Allow public read access to system docs" on public.meta_docs;
 create policy "Allow public read access to system docs"
 on public.meta_docs for select
 to authenticated
 using (true);
 
+drop policy if exists "Allow admins to manage system docs" on public.meta_docs;
 create policy "Allow admins to manage system docs"
 on public.meta_docs for all
 to authenticated

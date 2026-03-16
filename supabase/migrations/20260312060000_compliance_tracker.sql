@@ -53,4 +53,5 @@ LEFT JOIN organisation_unit_resource_actuals a ON a.org_sub_unit_id = s.id AND a
 
 -- Enable RLS
 ALTER TABLE public.organisation_unit_resource_actuals ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Users can manage their org actuals" ON public.organisation_unit_resource_actuals;
 CREATE POLICY "Users can manage their org actuals" ON public.organisation_unit_resource_actuals FOR ALL TO authenticated USING (true) WITH CHECK (true);
