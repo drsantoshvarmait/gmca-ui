@@ -1,19 +1,14 @@
 name: Cleanup Failed Workflow Runs
 on:
-  schedule:
-      - cron: '0 * * * *'
-        workflow_dispatch:
-        jobs:
-          cleanup:
-              runs-on: ubuntu-latest
-                  permissions:
-                        actions: write
-                              contents: read
-                                  steps:
-                                        - name: Delete failed runs
-                                                uses: dmvict/clean-workflow-runs@v1
-                                                        with:
-                                                                  token: ${{ github.token }}
-                                                                            run_conclusions: failure
-                                                                                      save_period: "02:00:00"
-                                                                                      
+  workflow_dispatch:
+  jobs:
+    cleanup:
+        runs-on: ubuntu-latest
+            steps:
+                  - name: Delete
+                          uses: dmvict/clean-workflow-runs@v1
+                                  with:
+                                            token: ${{ github.token }}
+                                                      run_conclusions: failure
+                                                                save_period: "02:00:00"
+                                                                
