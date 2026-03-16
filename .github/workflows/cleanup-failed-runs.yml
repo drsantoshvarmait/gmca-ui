@@ -1,13 +1,26 @@
 name: Cleanup
-on:
-  workflow_dispatch:
-  jobs:
-    cleanup:
-        runs-on: ubuntu-latest
-            steps:
-                  - uses: dmvict/clean-workflow-runs@v1
-                          with:
-                                    token: ${{ github.token }}
-                                              run_conclusions: failure
-                                                        save_period: "02:00:00"
-                                                        
+on: workflow_dispatch
+jobs:
+  cleanup:
+      runs-on: ubuntu-latest
+          steps:
+                - uses: actions/github-script@v7
+                        with:
+                                  script: |
+                                              const runs = await github.rest.actions.listWorkflowRuns({
+                                                            owner: context.repo.owner,
+                                                                          repo: context.repo.repo,
+                                                                                        workflow_id: 'production-deployment.yml',
+                                                                                                      status: 'failure'
+                                                                                                                  });
+                                                                                                                              for (const run of runs.data.workflow_runs) {
+                                                                                                                                            if (run.run_number === 70) {
+                                                                                                                                                            await github.rest.actions.deleteWorkflowRun({
+                                                                                                                                                                              owner: context.repo.owner,
+                                                                                                                                                                                                repo: context.repo.repo,
+                                                                                                                                                                                                                  run_id: run.id
+                                                                                                                                                                                                                                  });
+                                                                                                                                                                                                                                                  console.log('Deleted run #70');
+                                                                                                                                                                                                                                                                }
+                                                                                                                                                                                                                                                                            }
+                                                                                                                                                                                                                                                                            
