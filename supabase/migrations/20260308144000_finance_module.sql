@@ -9,7 +9,7 @@ create schema if not exists finance;
 -- BUDGET PERIODS
 -- (Fiscal Years, Quarters, etc.)
 -- =====================================================
-create table finance.budget_periods (
+create table if not exists finance.budget_periods (
     id uuid primary key default gen_random_uuid(),
     tenant_id uuid not null references core.tenants(tenant_id) on delete cascade,
     
@@ -24,12 +24,16 @@ create table finance.budget_periods (
     constraint check_dates check (start_date < end_date)
 );
 
-create index idx_budget_periods_tenant on finance.budget_periods(tenant_id);
+do $$ begin
+    if not exists (select 1 from pg_indexes where indexname = 'idx_budget_periods_tenant') then
+        create index idx_budget_periods_tenant on finance.budget_periods(tenant_id);
+    end if;
+end $$;
 
 -- =====================================================
 -- BUDGET CATEGORIES
 -- =====================================================
-create table finance.budget_categories (
+create table if not exists finance.budget_categories (
     id uuid primary key default gen_random_uuid(),
     tenant_id uuid not null references core.tenants(tenant_id) on delete cascade,
     
@@ -40,13 +44,17 @@ create table finance.budget_categories (
     created_at timestamptz not null default now()
 );
 
-create index idx_budget_categories_tenant on finance.budget_categories(tenant_id);
+do $$ begin
+    if not exists (select 1 from pg_indexes where indexname = 'idx_budget_categories_tenant') then
+        create index idx_budget_categories_tenant on finance.budget_categories(tenant_id);
+    end if;
+end $$;
 
 -- =====================================================
 -- BUDGET ALLOCATIONS
 -- (The actual "pot of money")
 -- =====================================================
-create table finance.budget_allocations (
+create table if not exists finance.budget_allocations (
     id uuid primary key default gen_random_uuid(),
     tenant_id uuid not null references core.tenants(tenant_id) on delete cascade,
     
@@ -60,14 +68,20 @@ create table finance.budget_allocations (
     updated_at timestamptz not null default now()
 );
 
-create index idx_budget_allocations_period on finance.budget_allocations(period_id);
-create index idx_budget_allocations_category on finance.budget_allocations(category_id);
+do $$ begin
+    if not exists (select 1 from pg_indexes where indexname = 'idx_budget_allocations_period') then
+        create index idx_budget_allocations_period on finance.budget_allocations(period_id);
+    end if;
+    if not exists (select 1 from pg_indexes where indexname = 'idx_budget_allocations_category') then
+        create index idx_budget_allocations_category on finance.budget_allocations(category_id);
+    end if;
+end $$;
 
 -- =====================================================
 -- BUDGET EXPENSES
 -- (The actual spend)
 -- =====================================================
-create table finance.budget_expenses (
+create table if not exists finance.budget_expenses (
     id uuid primary key default gen_random_uuid(),
     tenant_id uuid not null references core.tenants(tenant_id) on delete cascade,
     
@@ -88,8 +102,14 @@ create table finance.budget_expenses (
     updated_at timestamptz not null default now()
 );
 
-create index idx_budget_expenses_allocation on finance.budget_expenses(allocation_id);
-create index idx_budget_expenses_task on finance.budget_expenses(task_id);
+do $$ begin
+    if not exists (select 1 from pg_indexes where indexname = 'idx_budget_expenses_allocation') then
+        create index idx_budget_expenses_allocation on finance.budget_expenses(allocation_id);
+    end if;
+    if not exists (select 1 from pg_indexes where indexname = 'idx_budget_expenses_task') then
+        create index idx_budget_expenses_task on finance.budget_expenses(task_id);
+    end if;
+end $$;
 
 -- =====================================================
 -- ENABLE RLS
@@ -102,18 +122,22 @@ alter table finance.budget_expenses enable row level security;
 -- =====================================================
 -- TENANT ISOLATION POLICIES
 -- =====================================================
+drop policy if exists tenant_isolation_budget_periods on finance.budget_periods;
 create policy tenant_isolation_budget_periods
 on finance.budget_periods for all
 using (tenant_id = (auth.jwt() ->> 'tenant_id')::uuid);
 
+drop policy if exists tenant_isolation_budget_categories on finance.budget_categories;
 create policy tenant_isolation_budget_categories
 on finance.budget_categories for all
 using (tenant_id = (auth.jwt() ->> 'tenant_id')::uuid);
 
+drop policy if exists tenant_isolation_budget_allocations on finance.budget_allocations;
 create policy tenant_isolation_budget_allocations
 on finance.budget_allocations for all
 using (tenant_id = (auth.jwt() ->> 'tenant_id')::uuid);
 
+drop policy if exists tenant_isolation_budget_expenses on finance.budget_expenses;
 create policy tenant_isolation_budget_expenses
 on finance.budget_expenses for all
 using (tenant_id = (auth.jwt() ->> 'tenant_id')::uuid);
