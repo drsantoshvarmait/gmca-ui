@@ -1,0 +1,20 @@
+name: Cleanup Failed Workflow Runs
+
+on:
+  schedule:
+    - cron: '0 * * * *' # Every hour
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
+    steps:
+      - name: Delete failed runs older than 2 hours
+        uses: dmvict/clean-workflow-runs@v1
+        with:
+          token: ${{ github.token }}
+          run_status: failure
+          save_period: 2h
