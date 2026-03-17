@@ -25,4 +25,5 @@ ALTER TABLE core.profiles ADD COLUMN IF NOT EXISTS role TEXT DEFAULT 'USER';
 
 -- 4. Enable RLS on designations
 ALTER TABLE public.designations ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Designations are viewable by everyone" ON public.designations;
 CREATE POLICY "Designations are viewable by everyone" ON public.designations FOR SELECT USING (true);

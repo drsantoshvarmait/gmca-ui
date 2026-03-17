@@ -42,9 +42,24 @@ export const adminModules = [
         component: OrganisationManagement,
         visibility: (ctx) => !!ctx.contextCode 
       },
-      { id: "spaces", label: "Organisation Types", component: SpacesManager },
-      { id: "unit_masters", label: "Units", component: UnitMasterManager },
-      { id: "sub_unit_masters", label: "Sub-Units", component: SubUnitMasterManager },
+      { 
+        id: "spaces", 
+        label: "Organisation Types", 
+        component: SpacesManager,
+        visibility: (ctx) => !ctx.contextCode 
+      },
+      { 
+        id: "unit_masters", 
+        label: "Units", 
+        component: UnitMasterManager,
+        visibility: (ctx) => !ctx.contextCode 
+      },
+      { 
+        id: "sub_unit_masters", 
+        label: "Sub-Units", 
+        component: SubUnitMasterManager,
+        visibility: (ctx) => !ctx.contextCode 
+      },
     ]
   },
 
