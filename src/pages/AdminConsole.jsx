@@ -99,7 +99,10 @@ export default function AdminConsole() {
     }
   }
 
-  const env = import.meta.env.VITE_APP_ENV || "LOCAL";
+  const hostname = window.location.hostname;
+  const isStaging = hostname.includes("staging") || import.meta.env.VITE_APP_ENV === "STAGING";
+  const isProd = (hostname === "gmca-ui.vercel.app" || import.meta.env.VITE_APP_ENV === "PROD") && !isStaging;
+  const env = isProd ? "PROD" : (isStaging ? "STAGING" : "LOCAL");
 
   if (loadingContext) {
       return (
