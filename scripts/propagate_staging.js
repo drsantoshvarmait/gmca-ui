@@ -2,8 +2,8 @@ import pkg from 'pg';
 const { Client } = pkg;
 
 const STAGING = {
-    host: 'aws-1-ap-south-1.pooler.supabase.com',
-    port: 5432,
+    host: 'db.risrmpdbvoafowdvnonn.supabase.co',
+    port: 6543,
     user: 'postgres.risrmpdbvoafowdvnonn',
     password: process.env.STAGING_SUPABASE_DB_PASSWORD || 'Annuji1*4713',
     database: 'postgres',
