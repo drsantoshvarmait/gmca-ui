@@ -92,9 +92,93 @@ test.describe('Admin Functional Access Verification', () => {
             });
         });
 
+        // Mock Tenant Modules
+        await page.route('**/rest/v1/tenant_modules*', async (route) => {
+            await route.fulfill({
+                status: 200,
+                contentType: 'application/json',
+                body: JSON.stringify([
+                    { module_code: 'masters', is_enabled: true },
+                    { module_code: 'directory', is_enabled: true },
+                    { module_code: 'control-tower', is_enabled: true }
+                ])
+            });
+        });
+
+        // Mock Bottleneck Heatmap
+        await page.route('**/rest/v1/workflow_bottleneck_heatmap*', async (route) => {
+            await route.fulfill({
+                status: 200,
+                contentType: 'application/json',
+                body: JSON.stringify([
+                    { office_id: 'off-1', office_name: 'Main Office', pending_tasks: 3 }
+                ])
+            });
+        });
+
+        // Mock Running Workflows Monitor
+        await page.route('**/rest/v1/v_running_workflows_monitor*', async (route) => {
+            await route.fulfill({
+                status: 200,
+                contentType: 'application/json',
+                body: JSON.stringify([
+                    { workflow_instance_id: 'inst-1', person_id: 'User 1', elapsed_time: '2h', current_status: 'Active' }
+                ])
+            });
+        });
+
+        // Mock Audit Logs
+        await page.route('**/rest/v1/audit_logs*', async (route) => {
+            await route.fulfill({
+                status: 200,
+                contentType: 'application/json',
+                body: JSON.stringify([
+                    { created_at: new Date().toISOString(), action: 'Test Action' }
+                ])
+            });
+        });
+
+        // Mock SOP Workflows
+        await page.route('**/rest/v1/sop_workflow*', async (route) => {
+            await route.fulfill({
+                status: 200,
+                contentType: 'application/json',
+                body: JSON.stringify([{
+                    workflow_id: 'wf-1',
+                    workflow_name: 'Test Workflow',
+                    status: 'DRAFT',
+                    scope: 'TENANT',
+                    is_template: false,
+                    created_at: new Date().toISOString()
+                }])
+            });
+        });
+
+        // Mock Clone Workflow RPC
+        await page.route('**/rest/v1/rpc/clone_workflow*', async (route) => {
+            await route.fulfill({
+                status: 200,
+                contentType: 'application/json',
+                body: JSON.stringify({ workflow_id: 'wf-cloned' })
+            });
+        });
+
+        // Mock Organisations (Already partly mocked via user_org_roles join, but direct calls exist)
+        await page.route('**/rest/v1/organisations*', async (route) => {
+            await route.fulfill({
+                status: 200,
+                contentType: 'application/json',
+                body: JSON.stringify([{
+                    organisation_id: 'test-org-id',
+                    organisation_name: 'Test Org',
+                    organisation_type_id: 'type-1'
+                }])
+            });
+        });
+
         // Inject session into localStorage
         await page.addInitScript(() => {
-            const projectRef = 'aaritujhokbxezuxcqnm';
+            const projectRefs = ['aaritujhokbxezuxcqnm', 'risrmpdbvoafowdvnonn'];
             const session = {
                 access_token: 'fake-token',
                 token_type: 'bearer',
@@ -110,7 +194,9 @@ test.describe('Admin Functional Access Verification', () => {
                 },
                 expires_at: Math.floor(Date.now() / 1000) + 3600
             };
-            window.localStorage.setItem(`sb-${projectRef}-auth-token`, JSON.stringify(session));
+            projectRefs.forEach(ref => {
+                window.localStorage.setItem(`sb-${ref}-auth-token`, JSON.stringify(session));
+            });
         });
     });
 
