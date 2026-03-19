@@ -54,20 +54,15 @@ jobs:
 
       - name: Deploy Database Migrations
         run: |
-          # Link to the staging project
-          supabase link --project-ref risrmpdbvoafowdvnonn -p "${{ secrets.STAGING_SUPABASE_DB_PASSWORD }}"
-          
-          # Repair migrations if needed (using the linked connection)
-          # Note: supbase migration repair now uses the linked project by default
-          supabase migration repair --status applied 20260312062000
-          supabase migration repair --status applied 20260312062500
-          supabase migration repair --status reverted 20260309220000
-          supabase migration repair --status applied 20260315150000
-          
-          # Push migrations
-          supabase db push --include-all
+          node scripts/apply_migrations.js
         env:
-          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          STAGING_SUPABASE_DB_PASSWORD: ${{ secrets.STAGING_SUPABASE_DB_PASSWORD }}
+
+      - name: Elevate Staging Admin & Apply Compatibility
+        run: |
+          node scripts/propagate_staging.js
+        env:
+          STAGING_SUPABASE_DB_PASSWORD: ${{ secrets.STAGING_SUPABASE_DB_PASSWORD }}
 
       - name: Deploy to Vercel (Staging)
         uses: amondnet/vercel-action@v25
