@@ -5,7 +5,7 @@ const STAGING = {
     host: 'aws-1-ap-south-1.pooler.supabase.com',
     port: 5432,
     user: 'postgres.risrmpdbvoafowdvnonn',
-    password: process.env.STAGING_SUPABASE_DB_PASSWORD || 'Gaurav1*',
+    password: process.env.STAGING_SUPABASE_DB_PASSWORD || 'Annuji1*4713',
     database: 'postgres',
     ssl: { rejectUnauthorized: false }
 };
