@@ -37,12 +37,31 @@ export default function OrganisationTypeManager() {
   const [showAuditHistory, setShowAuditHistory] = useState(false);
   const [auditLogs, setAuditLogs] = useState([]);
   const [historyTarget, setHistoryTarget] = useState(null); // { name, id }
+  const [userProfile, setUserProfile] = useState(null);
 
   useEffect(() => {
-    fetchTypes();
-    fetchMasterUnits();
-    fetchMasterSubUnits();
+    initialize();
   }, []);
+
+  async function initialize() {
+    setLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase.schema("core").from("profiles").select("*").eq("id", user.id).single();
+        setUserProfile(profile);
+      }
+      await Promise.all([
+        fetchTypes(),
+        fetchMasterUnits(),
+        fetchMasterSubUnits()
+      ]);
+    } catch (err) {
+      console.error("Init error:", err);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
     if (selectedType) {
@@ -71,20 +90,60 @@ export default function OrganisationTypeManager() {
   }
 
   async function fetchMasterUnits() {
-    const { data, error } = await supabase
-      .from("master_organisation_units")
-      .select("*")
-      .order("unit_name");
+    let query = supabase.from("master_organisation_units").select("*").order("unit_name");
+    
+    // HIERARCHY LOGIC: Filter if Tenant/Org Admin
+    if (userProfile?.role === 'TENANT_ADMIN' || userProfile?.role === 'ORG_ADMIN') {
+        const level = userProfile.role === 'TENANT_ADMIN' ? 'TENANT' : 'ORGANISATION';
+        const selectionTable = level === 'TENANT' ? 'tenant_master_selections' : 'organisation_master_selections';
+        const filterCol = level === 'TENANT' ? 'tenant_id' : 'organisation_id';
+        const entityId = level === 'TENANT' ? userProfile.tenant_id : userProfile.organisation_id;
+
+        const { data: selections } = await supabase
+            .schema('core')
+            .from(selectionTable)
+            .select('master_id')
+            .eq(filterCol, entityId)
+            .eq('master_type', 'unit');
+       
+       if (selections) {
+         const ids = selections.map(s => s.master_id);
+         if (ids.length > 0) query = query.in('id', ids);
+         else { setMasterUnits([]); return; }
+       }
+    }
+
+    const { data, error } = await query;
     if (!error) {
       setMasterUnits(data || []);
     }
   }
 
   async function fetchMasterSubUnits() {
-    const { data, error } = await supabase
-      .from("master_organisation_sub_units")
-      .select("*")
-      .order("sub_unit_name");
+    let query = supabase.from("master_organisation_sub_units").select("*").order("sub_unit_name");
+
+    // HIERARCHY LOGIC: Filter if Tenant/Org Admin
+    if (userProfile?.role === 'TENANT_ADMIN' || userProfile?.role === 'ORG_ADMIN') {
+        const level = userProfile.role === 'TENANT_ADMIN' ? 'TENANT' : 'ORGANISATION';
+        const selectionTable = level === 'TENANT' ? 'tenant_master_selections' : 'organisation_master_selections';
+        const filterCol = level === 'TENANT' ? 'tenant_id' : 'organisation_id';
+        const entityId = level === 'TENANT' ? userProfile.tenant_id : userProfile.organisation_id;
+
+        const { data: selections } = await supabase
+            .schema('core')
+            .from(selectionTable)
+            .select('master_id')
+            .eq(filterCol, entityId)
+            .eq('master_type', 'sub_unit');
+        
+        if (selections) {
+          const ids = selections.map(s => s.master_id);
+          if (ids.length > 0) query = query.in('id', ids);
+          else { setMasterSubUnits([]); return; }
+        }
+     }
+
+    const { data, error } = await query;
     if (!error) {
       setMasterSubUnits(data || []);
     }

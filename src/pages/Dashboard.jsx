@@ -192,6 +192,7 @@ export default function Dashboard() {
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
       const { data: profile } = await supabase
+        .schema("core")
         .from("profiles")
         .select("*")
         .eq("id", user.id)

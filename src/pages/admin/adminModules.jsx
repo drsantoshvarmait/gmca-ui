@@ -46,19 +46,19 @@ export const adminModules = [
         id: "spaces", 
         label: "Organisation Types", 
         component: SpacesManager,
-        visibility: (ctx) => !ctx.contextCode 
+        visibility: (ctx) => !ctx.contextCode && ctx.userRole === 'SUPER_ADMIN'
       },
       { 
         id: "unit_masters", 
         label: "Units", 
         component: UnitMasterManager,
-        visibility: (ctx) => !ctx.contextCode 
+        visibility: (ctx) => !ctx.contextCode && ctx.userRole === 'SUPER_ADMIN'
       },
       { 
         id: "sub_unit_masters", 
         label: "Sub-Units", 
         component: SubUnitMasterManager,
-        visibility: (ctx) => !ctx.contextCode 
+        visibility: (ctx) => !ctx.contextCode && ctx.userRole === 'SUPER_ADMIN'
       },
     ]
   },
@@ -96,6 +96,7 @@ export const adminModules = [
     {
       id: "developer",
       label: "Developer",
+      visibility: (ctx) => ctx.userRole === 'SUPER_ADMIN',
       subModules: [
         { id: "docs", label: "System Docs", component: DocsViewer },
         { id: "schema", label: "Data Schema", component: SchemaView },
@@ -112,6 +113,7 @@ export const adminModules = [
     {
       id: "system",
       label: "System",
+      visibility: (ctx) => ctx.userRole === 'SUPER_ADMIN',
       subModules: [
         { id: "docs", label: "Project Docs", component: DocsViewer },
         { id: "settings", label: "Settings", component: AdminSettings }

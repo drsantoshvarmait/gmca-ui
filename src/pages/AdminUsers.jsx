@@ -21,7 +21,7 @@ export default function AdminUsers() {
     setLoading(true);
     try {
       // Fetch users
-      const { data: profiles } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
+      const { data: profiles } = await supabase.schema("core").from("profiles").select("*").order("created_at", { ascending: false });
 
       // Fetch orgs
       const { data: organisations } = await supabase.from("organisations").select("organisation_id, organisation_name");

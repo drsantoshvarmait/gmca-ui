@@ -44,6 +44,7 @@ export function LanguageProvider({ children }) {
   async function loadLanguage(userId) {
 
     const { data: profile, error } = await supabase
+      .schema("core")
       .from("profiles")
       .select("preferred_language_code")
       .eq("id", userId)
@@ -69,6 +70,7 @@ export function LanguageProvider({ children }) {
     if (!user) return
 
     const { error } = await supabase
+      .schema("core")
       .from("profiles")
       .update({ preferred_language_code: newLang })
       .eq("id", user.id)

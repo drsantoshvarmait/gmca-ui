@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../supabaseClient";
 import { toast, Toaster } from "react-hot-toast";
+import MasterSelector from "../../components/admin/MasterSelector";
 
 export default function OrganisationManagement() {
   const [orgs, setOrgs] = useState([]);
@@ -17,6 +18,7 @@ export default function OrganisationManagement() {
     organisation_type: "HOSPITAL",
     tenant_id: ""
   });
+  const [selector, setSelector] = useState({ show: false, entityId: null, type: 'unit' });
 
   useEffect(() => {
     initialize();
@@ -30,12 +32,15 @@ export default function OrganisationManagement() {
       if (!user) throw new Error("Not authenticated");
 
       const { data: profile, error: profileError } = await supabase
+        .schema("core")
         .from("profiles")
         .select("*")
         .eq("id", user.id)
-        .single();
+        .maybeSingle();
       
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.error("Profile load error:", profileError);
+      }
       setUserProfile(profile);
 
       // 2. Determine Tenant Context
@@ -113,6 +118,22 @@ export default function OrganisationManagement() {
     }
   }
 
+  async function handleDeleteOrg(id) {
+    if (!window.confirm("Are you sure you want to delete this organization? This cannot be undone.")) return;
+
+    // Optimistic UI update
+    const originalOrgs = [...orgs];
+    setOrgs(prev => prev.filter(o => o.organisation_id !== id));
+
+    const { error } = await supabase.from('organisations').delete().eq('organisation_id', id);
+    if (error) {
+      toast.error("Deletion failed: " + error.message);
+      setOrgs(originalOrgs); // Rollback
+    } else {
+      toast.success("Organization removed successfully.");
+    }
+  }
+
   const filteredOrgs = orgs.filter(o =>
     o.organisation_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     o.organisation_code?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -155,6 +176,7 @@ export default function OrganisationManagement() {
                 <th style={th}>Entity Name</th>
                 <th style={th}>Type</th>
                 {isSuper && <th style={th}>Parent Tenant</th>}
+                <th style={th}>Masters</th>
                 <th style={th}>Established</th>
               </tr>
             </thead>
@@ -182,6 +204,52 @@ export default function OrganisationManagement() {
                             {tenants.find(t => t.tenant_id === o.tenant_id)?.tenant_name || "Network Global"}
                         </td>
                     )}
+                    <td style={td}>
+                        {isSuper ? (
+                          <div style={{ display: 'flex', gap: '8px' }}>
+                            <button 
+                                style={actionBtn}
+                                onClick={() => setSelector({ show: true, entityId: o.organisation_id, type: 'unit' })}
+                            >
+                                Units
+                            </button>
+                            <button 
+                                style={actionBtn}
+                                onClick={() => setSelector({ show: true, entityId: o.organisation_id, type: 'sub_unit' })}
+                            >
+                                Subs
+                            </button>
+                            <button 
+                                style={actionBtn}
+                                onClick={() => setSelector({ show: true, entityId: o.organisation_id, type: 'designation' })}
+                            >
+                                Roles
+                            </button>
+                            <button 
+                                style={actionBtn}
+                                onClick={() => setSelector({ show: true, entityId: o.organisation_id, type: 'item' })}
+                            >
+                                Items
+                            </button>
+                            <button 
+                                style={actionBtn}
+                                onClick={() => setSelector({ show: true, entityId: o.organisation_id, type: 'vendor' })}
+                            >
+                                Vendors
+                            </button>
+                            <button 
+                                style={{ ...actionBtn, color: '#ef4444', borderColor: '#fecaca' }} 
+                                onClick={() => handleDeleteOrg(o.organisation_id)}
+                            >
+                                Delete
+                            </button>
+                          </div>
+                        ) : (
+                          <div style={{ color: '#64748b', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                             ⚡ Global Governance Active
+                          </div>
+                        )}
+                    </td>
                     <td style={td}>{new Date(o.created_at).toLocaleDateString()}</td>
                   </tr>
                 ))
@@ -265,6 +333,15 @@ export default function OrganisationManagement() {
           </div>
         </div>
       )}
+
+      {selector.show && (
+          <MasterSelector 
+              level="ORGANISATION"
+              entityId={selector.entityId}
+              masterType={selector.type}
+              onClose={() => setSelector({ ...selector, show: false })}
+          />
+      )}
     </div>
   );
 }
@@ -278,6 +355,7 @@ const actions = { display: "flex", gap: "16px" };
 const searchInput = { padding: "12px 20px", borderRadius: "12px", border: "1px solid #e2e8f0", width: "300px", boxShadow: "0 1px 2px rgba(0,0,0,0.05)", outline: 'none' };
 const primaryBtn = { background: "#3b82f6", color: "#fff", border: "none", padding: "12px 24px", borderRadius: "12px", fontWeight: "800", cursor: "pointer", boxShadow: "0 4px 6px -1px rgba(59, 130, 246, 0.4)" };
 const secondaryBtn = { background: "#fff", color: "#475569", border: "1px solid #e2e8f0", padding: "12px 24px", borderRadius: "12px", fontWeight: "700", cursor: "pointer" };
+const actionBtn = { background: "#f1f5f9", border: "1px solid #e2e8f0", color: "#475569", padding: "4px 8px", borderRadius: "8px", fontSize: "11px", fontWeight: "800", cursor: "pointer" };
 const glassCard = { background: "#fff", borderRadius: "24px", boxShadow: "0 10px 15px -3px rgba(0,0,0,0.05)", overflow: "hidden", border: "1px solid #f1f5f9" };
 const table = { width: "100%", borderCollapse: "collapse" };
 const tableHeader = { background: "#f8fafc", borderBottom: "1px solid #f1f5f9" };

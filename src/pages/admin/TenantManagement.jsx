@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { supabase } from "../../supabaseClient"
 import { toast, Toaster } from "react-hot-toast"
+import MasterSelector from "../../components/admin/MasterSelector"
 
 export default function TenantManagement() {
     const [tenants, setTenants] = useState([])
@@ -11,6 +12,7 @@ export default function TenantManagement() {
         tenant_code: "",
         status: "ACTIVE"
     })
+    const [selector, setSelector] = useState({ show: false, entityId: null, type: 'unit' })
 
     useEffect(() => {
         fetchTenants()
@@ -77,6 +79,7 @@ export default function TenantManagement() {
                                 <th style={th}>Code</th>
                                 <th style={th}>Name</th>
                                 <th style={th}>Status</th>
+                                <th style={th}>Masters</th>
                                 <th style={th}>Created At</th>
                             </tr>
                         </thead>
@@ -101,6 +104,28 @@ export default function TenantManagement() {
                                             }}>
                                                 {t.status}
                                             </span>
+                                        </td>
+                                        <td style={td}>
+                                            <div style={{ display: 'flex', gap: '8px' }}>
+                                                <button 
+                                                    style={actionBtn}
+                                                    onClick={() => setSelector({ show: true, entityId: t.tenant_id, type: 'unit' })}
+                                                >
+                                                    Units
+                                                </button>
+                                                <button 
+                                                    style={actionBtn}
+                                                    onClick={() => setSelector({ show: true, entityId: t.tenant_id, type: 'sub_unit' })}
+                                                >
+                                                    Subs
+                                                </button>
+                                                <button 
+                                                    style={actionBtn}
+                                                    onClick={() => setSelector({ show: true, entityId: t.tenant_id, type: 'designation' })}
+                                                >
+                                                    Roles
+                                                </button>
+                                            </div>
                                         </td>
                                         <td style={td}>{new Date(t.created_at).toLocaleDateString()}</td>
                                     </tr>
@@ -157,9 +182,20 @@ export default function TenantManagement() {
                     </div>
                 </div>
             )}
+
+            {selector.show && (
+                <MasterSelector 
+                    level="TENANT"
+                    entityId={selector.entityId}
+                    masterType={selector.type}
+                    onClose={() => setSelector({ ...selector, show: false })}
+                />
+            )}
         </div>
     )
 }
+
+const actionBtn = { background: "#eff6ff", border: "1px solid #dbeafe", color: "#2563eb", padding: "4px 8px", borderRadius: "6px", fontSize: "11px", fontWeight: "700", cursor: "pointer" }
 
 const container = { padding: "20px", display: "flex", flexDirection: "column", gap: "20px" }
 const header = { display: "flex", justifyContent: "space-between", alignItems: "center" }

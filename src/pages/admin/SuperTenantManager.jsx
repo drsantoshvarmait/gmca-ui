@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../../supabaseClient";
 import { toast, Toaster } from "react-hot-toast";
+import MasterSelector from "../../components/admin/MasterSelector";
 
 const INDIAN_STATES = [
   "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat", "Haryana", 
@@ -41,6 +42,7 @@ export default function SuperTenantManager() {
   const [showAddTenant, setShowAddTenant] = useState(false);
   const [showEditTenant, setShowEditTenant] = useState(false);
   const [orgs, setOrgs] = useState([]);
+  const [selector, setSelector] = useState({ show: false, entityId: null, type: 'unit' });
 
   // Form States
   const [newTenant, setNewTenant] = useState({
@@ -182,6 +184,23 @@ export default function SuperTenantManager() {
     }
   }
 
+  async function handleDeleteTenant(id) {
+    if (!window.confirm("CRITICAL: Are you sure? This will delete all organisations, users, and data associated with this jurisdiction.")) return;
+    
+    // Optimistic UI: Hide immediately to prevent "ghosting"
+    const originalTenants = [...tenants];
+    setTenants(prev => prev.filter(t => t.tenant_id !== id));
+    setSelectedTenant(null);
+
+    const { error } = await supabase.from('tenants').delete().eq('tenant_id', id);
+    if (error) {
+      toast.error("Deletion failed: " + error.message);
+      setTenants(originalTenants); // Rollback on error
+    } else {
+      toast.success("Jurisdiction and all associated data removed.");
+    }
+  }
+
   const resetNewForm = () => {
     setNewTenant({
         tenant_name: "",
@@ -294,6 +313,58 @@ export default function SuperTenantManager() {
                     Tenant Login ↗
                   </button>
                   <button style={editActionBtn} onClick={openEditModal}>Edit Tenant</button>
+                   <button 
+                        style={secondaryBtn} 
+                        onClick={() => handleUpdateStatus(selectedTenant.tenant_id, selectedTenant.status === 'INACTIVE' ? 'ACTIVE' : 'INACTIVE')}
+                    >
+                        {selectedTenant.status === 'INACTIVE' ? 'Activate' : 'Deactivate'}
+                    </button>
+                    <button 
+                        style={{ ...secondaryBtn, color: '#ef4444', borderColor: '#fecaca' }} 
+                        onClick={() => handleDeleteTenant(selectedTenant.tenant_id)}
+                    >
+                        Delete Jurisdiction
+                    </button>
+                 </div>
+               </div>
+ 
+               {/* Master Curation Section */}
+               <div style={{ ...orgSection, marginBottom: '40px' }}>
+                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                   <h3 style={{ ...panelTitle, margin: 0 }}>Curation & Masters</h3>
+                   <div style={titleLine}></div>
+                 </div>
+                 <div style={{ display: 'flex', gap: '12px' }}>
+                     <button 
+                         style={masterBtn}
+                         onClick={() => setSelector({ show: true, entityId: selectedTenant.tenant_id, type: 'unit' })}
+                     >
+                         📚 Curate Units
+                     </button>
+                    <button 
+                        style={masterBtn}
+                        onClick={() => setSelector({ show: true, entityId: selectedTenant.tenant_id, type: 'sub_unit' })}
+                    >
+                        🏢 Curate Subs
+                    </button>
+                    <button 
+                        style={masterBtn}
+                        onClick={() => setSelector({ show: true, entityId: selectedTenant.tenant_id, type: 'designation' })}
+                    >
+                        👥 Curate Roles
+                    </button>
+                    <button 
+                        style={masterBtn}
+                        onClick={() => setSelector({ show: true, entityId: selectedTenant.tenant_id, type: 'item' })}
+                    >
+                        📦 Curate Items
+                    </button>
+                    <button 
+                        style={masterBtn}
+                        onClick={() => setSelector({ show: true, entityId: selectedTenant.tenant_id, type: 'vendor' })}
+                    >
+                        🤝 Curate Vendors
+                    </button>
                 </div>
               </div>
 
@@ -547,6 +618,15 @@ export default function SuperTenantManager() {
           </div>
         </div>
       )}
+
+      {selector.show && (
+        <MasterSelector 
+            level="TENANT"
+            entityId={selector.entityId}
+            masterType={selector.type}
+            onClose={() => setSelector({ ...selector, show: false })}
+        />
+      )}
     </div>
   );
 }
@@ -615,3 +695,23 @@ const modalActions = { display: "flex", justifyContent: "flex-end", gap: "12px",
 const govBox = { background: "#f0f9ff", padding: "20px", borderRadius: "16px", border: "1px solid #bae6fd", display: "flex", flexDirection: "column", gap: "20px" };
 const brandingBox = { background: "#f8fafc", padding: "20px", borderRadius: "16px", border: "1px solid #e2e8f0", display: "flex", flexDirection: "column", gap: "16px" };
 const boxTitle = { margin: 0, fontSize: '11px', fontWeight: '900', color: '#64748b', textTransform: 'uppercase', letterSpacing: '1px' };
+
+const masterBtn = {
+    background: "white",
+    color: "#1e293b",
+    border: "1px solid #e2e8f0",
+    padding: "12px 24px",
+    borderRadius: "14px",
+    fontWeight: "700",
+    cursor: "pointer",
+    fontSize: "13px",
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    transition: "all 0.2s",
+    boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+    ":hover": {
+        borderColor: "#3b82f6",
+        background: "#f8fafc"
+    }
+};

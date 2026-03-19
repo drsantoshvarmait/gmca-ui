@@ -25,6 +25,7 @@ export default function HRModule() {
     const [creatorRole, setCreatorRole] = useState("");
     const [isTeaching, setIsTeaching] = useState(true);
     const [isCreating, setIsCreating] = useState(false);
+    const [userProfile, setUserProfile] = useState(null);
 
     useEffect(() => {
         loadMasterData();
@@ -33,8 +34,33 @@ export default function HRModule() {
     async function loadMasterData() {
         try {
             setLoading(true);
-            const { data: typesData } = await supabase.from("organisation_types").select("*").order("organisation_type");
-            const { data: desigData } = await supabase.from("designations").select("*").order("designation_name");
+            const { data: { user } } = await supabase.auth.getUser();
+            let profile = null;
+            if (user) {
+                const { data: p } = await supabase.schema("core").from("profiles").select("*").eq("id", user.id).single();
+                profile = p;
+                setUserProfile(p);
+            }
+
+            let typesQuery = supabase.from("organisation_types").select("*").order("organisation_type");
+            let desigQuery = supabase.from("designations").select("*").order("designation_name");
+
+            if (profile?.role === 'TENANT_ADMIN' || profile?.role === 'ORG_ADMIN') {
+                const level = profile.role === 'TENANT_ADMIN' ? 'TENANT' : 'ORGANISATION';
+                const selectionTable = level === 'TENANT' ? 'tenant_master_selections' : 'organisation_master_selections';
+                const filterCol = level === 'TENANT' ? 'tenant_id' : 'organisation_id';
+                const entityId = level === 'TENANT' ? profile.tenant_id : profile.organisation_id;
+
+                const { data: selections } = await supabase.schema('core').from(selectionTable).select('master_id').eq(filterCol, entityId).eq('master_type', 'designation');
+                if (selections) {
+                    const ids = selections.map(s => s.master_id);
+                    if (ids.length > 0) desigQuery = desigQuery.in('designation_id', ids);
+                    else { setDesignations([]); }
+                }
+            }
+
+            const { data: typesData } = await typesQuery;
+            const { data: desigData } = await desigQuery;
 
             setOrgTypes(typesData || []);
             setDesignations(desigData || []);

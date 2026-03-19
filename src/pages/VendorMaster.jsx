@@ -24,22 +24,30 @@ export default function VendorMaster() {
     async function loadVendors() {
         try {
             setLoading(true);
-            // Fetch vendors linked to this tenant via the junction table
-            const { data, error } = await supabase
-                .from("proc_tenant_vendors")
-                .select(`
-                    internal_vendor_code,
-                    status,
-                    vendors:proc_vendors (
-                        vendor_id,
-                        name,
-                        pan,
-                        website
-                    )
-                `);
+            const orgId = localStorage.getItem("active_org_id");
 
-            if (error) throw error;
-            setVendors(data || []);
+            // 1. Fetch Organisation Selections for 'vendor'
+            const { data: selectionData } = await supabase
+                .schema('core')
+                .from('organisation_master_selections')
+                .select('master_id')
+                .eq('organisation_id', orgId)
+                .eq('master_type', 'vendor');
+            
+            const selectedVendorIds = (selectionData || []).map(s => s.master_id);
+
+            if (selectedVendorIds.length > 0) {
+                const { data, error } = await supabase
+                    .from("proc_vendors")
+                    .select("*")
+                    .in("vendor_id", selectedVendorIds)
+                    .order('name', { ascending: true });
+
+                if (error) throw error;
+                setVendors(data || []);
+            } else {
+                setVendors([]);
+            }
         } catch (err) {
             toast.error("Failed to load vendors: " + err.message);
         } finally {
@@ -61,7 +69,7 @@ export default function VendorMaster() {
 
             // 2. Link to Tenant
             const { data: { user } } = await supabase.auth.getUser();
-            const { data: profile } = await supabase.from("profiles").select("tenant_id").eq("id", user.id).single();
+            const { data: profile } = await supabase.schema("core").from("profiles").select("tenant_id").eq("id", user.id).single();
 
             const { error: linkError } = await supabase
                 .from("proc_tenant_vendors")
@@ -89,9 +97,8 @@ export default function VendorMaster() {
                 <div>
                     <button onClick={() => navigate("/procurement")} style={backBtn}>← Procurement</button>
                     <h1 style={title}>Authorized Vendor Master</h1>
-                    <p style={subtitle}>Global supplier directory with tenant-specific status and terms.</p>
+                    <p style={subtitle}>Global supplier directory with organization-specific selection.</p>
                 </div>
-                <button style={primaryBtn} onClick={() => setShowAddModal(true)}>+ Onboard New Vendor</button>
             </div>
 
             <div style={searchBar}>
@@ -122,17 +129,19 @@ export default function VendorMaster() {
                                 <tr><td colSpan="6" style={emptyCell}>No vendors found. Onboard your first supplier.</td></tr>
                             ) : (
                                 vendors.map((v, idx) => (
-                                    <tr key={idx} style={tr}>
-                                        <td style={{ ...td, fontWeight: '700', color: '#4f46e5' }}>{v.internal_vendor_code}</td>
-                                        <td style={{ ...td, fontWeight: '600' }}>{v.vendors?.name}</td>
-                                        <td style={td}>{v.vendors?.pan || 'N/A'}</td>
-                                        <td style={td}><a href={v.vendors?.website} target="_blank" style={link}>{v.vendors?.website || '-'}</a></td>
+                                    <tr key={v.vendor_id} style={tr}>
+                                        <td style={{ ...td, fontWeight: '700', color: '#4f46e5' }}>VEND-{idx + 101}</td>
+                                        <td style={{ ...td, fontWeight: '600' }}>{v.name}</td>
+                                        <td style={td}>{v.pan || 'N/A'}</td>
+                                        <td style={td}><a href={v.website} target="_blank" style={link}>{v.website || '-'}</a></td>
                                         <td style={td}>
-                                            <span style={{ ...statusBadge, backgroundColor: v.status === 'ACTIVE' ? '#ecfdf5' : '#fee2e2', color: v.status === 'ACTIVE' ? '#059669' : '#dc2626' }}>
-                                                {v.status}
+                                            <span style={{ ...statusBadge, backgroundColor: '#ecfdf5', color: '#059669' }}>
+                                                ACTIVE
                                             </span>
                                         </td>
-                                        <td style={td}><button style={viewBtn}>View History</button></td>
+                                        <td style={td}>
+                                            <span style={{ fontSize: '11px', color: '#94a3b8' }}>Statutory</span>
+                                        </td>
                                     </tr>
                                 ))
                             )}

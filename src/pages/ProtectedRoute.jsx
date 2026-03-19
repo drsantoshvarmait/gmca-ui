@@ -25,6 +25,7 @@ export default function ProtectedRoute({ children, requireAdmin = false }) {
       }
 
       const { data } = await supabase
+        .schema("core")
         .from("profiles")
         .select("role")
         .eq("id", session.user.id)

@@ -5,6 +5,7 @@ import { supabase } from "./supabaseClient"
 import Login from "./pages/Login"
 import Signup from "./pages/Signup"
 import Dashboard from "./pages/Dashboard"
+import Gateway from "./pages/Gateway"
 import SubmitLetter from "./pages/SubmitLetter"
 import Communications from "./pages/Communications"
 import CommunicationDetails from "./pages/CommunicationDetails"
@@ -118,12 +119,7 @@ function App() {
         >
           <div
             style={{ cursor: "pointer", fontWeight: "bold" }}
-            onClick={() => {
-              // Try to find context code from URL if possible
-              const parts = location.pathname.split('/');
-              const context = parts[1] && !['login', 'signup', 'superadmin-console', 'admin'].includes(parts[1]) ? parts[1] : '';
-              navigate(context ? `/${context}/dashboard` : "/dashboard");
-            }}
+            onClick={() => navigate("/")}
           >
             Governance System v2.2 [SYNC_OK]
           </div>
@@ -165,7 +161,12 @@ function App() {
 
         <Route
           path="/"
-          element={<ProtectedRoute><Dashboard /></ProtectedRoute>}
+          element={<ProtectedRoute><Gateway /></ProtectedRoute>}
+        />
+
+        <Route
+          path="/gateway"
+          element={<ProtectedRoute><Gateway /></ProtectedRoute>}
         />
 
         <Route
@@ -173,62 +174,26 @@ function App() {
           element={<ProtectedRoute><Dashboard /></ProtectedRoute>}
         />
 
+        {/* ADMIN CONSOLE ROUTES (BEFORE PARAMETER ROUTES) */}
+        <Route
+          path="/superadmin-console"
+          element={<ProtectedRoute><AdminConsole /></ProtectedRoute>}
+        />
+
+        <Route
+          path="/admin"
+          element={<ProtectedRoute><AdminConsole /></ProtectedRoute>}
+        />
+
+        <Route
+          path="/admin-console"
+          element={<ProtectedRoute><AdminConsole /></ProtectedRoute>}
+        />
+
         <Route path="/:contextCode">
           <Route
             path="dashboard"
             element={<ProtectedRoute><Dashboard /></ProtectedRoute>}
-          />
-
-          {/* COMMUNICATION SYSTEM */}
-          <Route
-            path="submit-letter"
-            element={<ProtectedRoute><SubmitLetter /></ProtectedRoute>}
-          />
-
-          <Route
-            path="outbox"
-            element={<ProtectedRoute><Outbox /></ProtectedRoute>}
-          />
-
-          <Route
-            path="communications"
-            element={<ProtectedRoute><Communications /></ProtectedRoute>}
-          />
-
-          <Route
-            path="communication/:id"
-            element={<ProtectedRoute><CommunicationDetails /></ProtectedRoute>}
-          />
-
-          {/* ADMIN MODULES */}
-          <Route
-            path="departments"
-            element={<ProtectedRoute><DepartmentsPage /></ProtectedRoute>}
-          />
-
-          <Route
-            path="designations"
-            element={<ProtectedRoute><DesignationView /></ProtectedRoute>}
-          />
-
-          <Route
-            path="admin/workflows"
-            element={<ProtectedRoute><AdminWorkflows /></ProtectedRoute>}
-          />
-
-          <Route
-            path="admin/organizations"
-            element={<ProtectedRoute><AdminOrganizations /></ProtectedRoute>}
-          />
-
-          <Route
-            path="admin-console"
-            element={<ProtectedRoute><AdminConsole /></ProtectedRoute>}
-          />
-
-          <Route
-            path="workflow-builder/:id"
-            element={<ProtectedRoute><WorkflowBuilder /></ProtectedRoute>}
           />
 
           {/* WORKFLOW ENGINE */}
@@ -251,178 +216,131 @@ function App() {
             path="procurement/new-requisition"
             element={<ProtectedRoute><PurchaseRequisitionForm /></ProtectedRoute>}
           />
+
+          {/* ADMIN CONSOLE FOR CONTEXT (TENANT / ORG) */}
+          <Route
+            path="admin-console"
+            element={<ProtectedRoute><AdminConsole /></ProtectedRoute>}
+          />
         </Route>
 
-        {/* REMAINING LEGACY ROUTES FOR COMPATIBILITY */}
+        {/* COMMON / LEGACY ROUTES */}
         <Route
           path="/submit-letter"
           element={<ProtectedRoute><SubmitLetter /></ProtectedRoute>}
         />
-
         <Route
           path="/outbox"
           element={<ProtectedRoute><Outbox /></ProtectedRoute>}
         />
-
         <Route
           path="/communications"
           element={<ProtectedRoute><Communications /></ProtectedRoute>}
         />
-
         <Route
           path="/communication/:id"
           element={<ProtectedRoute><CommunicationDetails /></ProtectedRoute>}
         />
-
-
-        {/* ADMIN CONSOLE */}
-
-        <Route
-          path="/superadmin-console"
-          element={<ProtectedRoute><AdminConsole /></ProtectedRoute>}
-        />
-
-        <Route
-          path="/admin"
-          element={<ProtectedRoute><AdminConsole /></ProtectedRoute>}
-        />
-
-
-        {/* ADMIN MODULES */}
-
         <Route
           path="/departments"
           element={<ProtectedRoute><DepartmentsPage /></ProtectedRoute>}
         />
-
         <Route
           path="/designations"
           element={<ProtectedRoute><DesignationView /></ProtectedRoute>}
         />
-
         <Route
           path="/admin/workflows"
           element={<ProtectedRoute><AdminWorkflows /></ProtectedRoute>}
         />
-
         <Route
           path="/admin/docs"
           element={<ProtectedRoute><AdminDocs /></ProtectedRoute>}
         />
-
         <Route
           path="/admin/notifications"
           element={<ProtectedRoute><AdminNotifications /></ProtectedRoute>}
         />
-
         <Route
           path="/admin/settings"
           element={<ProtectedRoute><AdminSettings /></ProtectedRoute>}
         />
-
         <Route
           path="/admin/organizations"
           element={<ProtectedRoute><AdminOrganizations /></ProtectedRoute>}
         />
 
-
         {/* WORKFLOW MONITORING */}
-
         <Route
           path="/admin/workflow-monitor"
           element={<ProtectedRoute><AdminWorkflowDashboard /></ProtectedRoute>}
         />
-
-
-        {/* WORKFLOW HEATMAP */}
-
         <Route
           path="/admin/workflow-heatmap"
           element={<ProtectedRoute><WorkflowBottleneckHeatmap /></ProtectedRoute>}
         />
-
-
-        {/* TEST PAGE */}
-
         <Route
           path="/admin/test-heatmap"
           element={<ProtectedRoute><TestHeatmapAPI /></ProtectedRoute>}
         />
 
-
         {/* WORKFLOW ENGINE */}
-
         <Route
           path="/workflow-inbox"
           element={<ProtectedRoute><WorkflowInbox /></ProtectedRoute>}
         />
-
         <Route
           path="/workflow-builder/:id"
           element={<ProtectedRoute><WorkflowBuilder /></ProtectedRoute>}
         />
 
-
         {/* TASKS */}
-
         <Route
           path="/task/:id"
           element={<ProtectedRoute><TaskDetails /></ProtectedRoute>}
         />
-
         <Route
           path="/task/:taskId"
           element={<ProtectedRoute><TaskApproval /></ProtectedRoute>}
         />
-
         <Route
           path="/timeline/:taskId"
           element={<ProtectedRoute><TaskTimeline /></ProtectedRoute>}
         />
 
-
         {/* WORKFLOW INSPECTOR */}
-
         <Route
           path="/admin/workflow-inspector"
           element={<ProtectedRoute><WorkflowInspector /></ProtectedRoute>}
         />
-
         <Route
           path="/admin/control-tower"
           element={<ProtectedRoute><WorkflowControlTower /></ProtectedRoute>}
         />
-
         <Route
           path="/finance"
           element={<ProtectedRoute><FinanceDashboard /></ProtectedRoute>}
         />
-
         <Route
           path="/procurement"
           element={<ProtectedRoute><ProcurementDashboard /></ProtectedRoute>}
         />
-
         <Route
           path="/procurement/new-requisition"
           element={<ProtectedRoute><PurchaseRequisitionForm /></ProtectedRoute>}
         />
-
         <Route
           path="/procurement/vendor-master"
           element={<ProtectedRoute><VendorMaster /></ProtectedRoute>}
         />
-
         <Route
           path="/procurement/goods-receipt"
           element={<ProtectedRoute><GoodsReceiptForm /></ProtectedRoute>}
         />
-
         <Route
           path="/finance/coa"
           element={<ProtectedRoute><ChartOfAccounts /></ProtectedRoute>}
         />
-
         <Route
           path="/procurement/item-master"
           element={<ProtectedRoute><ItemMaster /></ProtectedRoute>}

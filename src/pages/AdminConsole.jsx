@@ -6,8 +6,12 @@ import { supabase } from "../supabaseClient"
 export default function AdminConsole() {
   const { contextCode } = useParams();
 
-  const [context, setContext] = useState({ isMedicalCollege: false, userRole: null });
+  // 1. Hooks (MUST be at the top)
+  const [context, setContext] = useState({ isMedicalCollege: false, userRole: null, tenantId: null });
+  const [enabledModules, setEnabledModules] = useState([]);
   const [loadingContext, setLoadingContext] = useState(true);
+  const [tab, setTab] = useState(null);
+  const [subTab, setSubTab] = useState(null);
 
   useEffect(() => {
     async function loadContext() {
@@ -15,13 +19,20 @@ export default function AdminConsole() {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
+        console.log("Fetching context for user:", user.email);
+
         // Fetch profile
-        const { data: profile } = await supabase
+        const { data: profile, error: profileErr } = await supabase
+          .schema("core")
           .from("profiles")
-          .select("role")
+          .select("id, role, tenant_id")
           .eq("id", user.id)
-          .single();
+          .maybeSingle();
         
+        if (profileErr) throw profileErr;
+        
+        console.log("Profile fetched:", profile);
+
         // Fetch Tenant context
         const { data: roles } = await supabase
           .from("user_org_roles")
@@ -32,10 +43,28 @@ export default function AdminConsole() {
 
         setContext({
            isMedicalCollege: isMed,
-           userRole: profile?.role
+           userRole: profile?.role,
+           tenantId: profile?.tenant_id
         });
+
+        // Fetch Enabled Modules for this tenant
+        if (profile?.role === 'SUPER_ADMIN') {
+            console.log("Applying SuperAdmin bypass for modules");
+            setEnabledModules(['masters', 'directory', 'modules', 'notifications', 'developer', 'system']);
+        } else if (profile?.tenant_id) {
+            console.log("Fetching enabled modules for tenant:", profile.tenant_id);
+            const { data: mods, error: modErr } = await supabase
+                .schema("core")
+                .from("tenant_modules")
+                .select("module_code")
+                .eq("tenant_id", profile.tenant_id)
+                .eq("is_enabled", true);
+            
+            if (modErr) throw modErr;
+            setEnabledModules(mods?.map(m => m.module_code) || []);
+        }
       } catch (err) {
-          console.error("Context Error:", err);
+          console.error("Critical Context Error:", err);
       } finally {
           setLoadingContext(false);
       }
@@ -43,37 +72,55 @@ export default function AdminConsole() {
     loadContext();
   }, []);
 
-  // Filter modules based on context
-  const filteredModules = adminModules.map(m => {
-    if (m.subModules) {
-        return {
-            ...m,
-            subModules: m.subModules.filter(sm => {
-                if (typeof sm.visibility === 'function') {
-                    return sm.visibility({ ...context, contextCode });
-                }
-                return true;
-            })
-        };
-    }
-    return m;
-  }).filter(m => {
-      if (m.subModules && m.subModules.length === 0) return false;
-      return true;
-  });
+  // 2. Content Filter Logic
+  const filteredModules = adminModules
+    .filter(m => {
+        const isEnabledInDb = enabledModules.includes(m.id);
+        const isSuper = context.userRole === 'SUPER_ADMIN';
+        if (!isEnabledInDb && !isSuper) return false;
 
-  const [tab, setTab] = useState(null)
-  const [subTab, setSubTab] = useState(null)
+        if (typeof m.visibility === 'function') {
+            return m.visibility({ ...context, contextCode });
+        }
+        return true;
+    })
+    .map(m => {
+        if (m.subModules) {
+            return {
+                ...m,
+                subModules: m.subModules.filter(sm => {
+                    if (typeof sm.visibility === 'function') {
+                        return sm.visibility({ ...context, contextCode });
+                    }
+                    return true;
+                })
+            };
+        }
+        return m;
+    }).filter(m => {
+        if (m.subModules && m.subModules.length === 0 && m.id !== 'notifications') return false;
+        return true;
+    });
 
-  // Initialize tabs when modules are ready
+  // 3. Tab Sync Effect
   useEffect(() => {
-      if (!loadingContext && filteredModules.length > 0 && !tab) {
-          setTab(filteredModules[0].id);
-          if (filteredModules[0].subModules?.length > 0) {
-              setSubTab(filteredModules[0].subModules[0].id);
+      if (!loadingContext && filteredModules.length > 0) {
+          if (!tab || !filteredModules.find(m => m.id === tab)) {
+            const firstId = filteredModules[0].id;
+            setTab(firstId);
+            if (filteredModules[0].subModules?.length > 0) {
+                setSubTab(filteredModules[0].subModules[0].id);
+            }
           }
       }
   }, [loadingContext, filteredModules, tab]);
+
+  console.log("Admin Console Debug:", { 
+    userRole: context.userRole, 
+    enabledModulesCount: enabledModules.length,
+    filteredModulesCount: filteredModules.length,
+    currentTab: tab 
+  });
 
   const activeModule = filteredModules.find(m => m.id === tab)
   const isParentTab = !!activeModule?.subModules

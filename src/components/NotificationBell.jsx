@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom"
 import { useState, useEffect, useRef } from "react"
 import { supabase } from "../supabaseClient"
+import { toast } from "react-hot-toast"
 
 export default function NotificationBell() {
 
@@ -53,7 +54,7 @@ export default function NotificationBell() {
     setLoading(false)
   }
 
-  const unreadCount = notifications.filter(n => !n.read).length
+  const unreadCount = notifications.filter(n => !(n.is_read || n.read)).length
 
   async function markAsRead(id) {
 
@@ -65,7 +66,7 @@ export default function NotificationBell() {
     if (!error) {
       setNotifications(prev =>
         prev.map(n =>
-          n.notification_queue_id === id ? { ...n, is_read: true } : n
+          n.notification_queue_id === id ? { ...n, is_read: true, read: true } : n
         )
       )
     }
@@ -144,6 +145,30 @@ export default function NotificationBell() {
             </div>
           )}
 
+          {!loading && notifications.length > 0 && (
+            <div style={{ padding: "8px 12px", borderBottom: "1px solid #eee", textAlign: "right" }}>
+              <button 
+                onClick={async () => {
+                   const unreadIds = notifications.filter(n => !(n.is_read || n.read)).map(n => n.notification_queue_id);
+                   if (unreadIds.length > 0) {
+                      const { error } = await supabase
+                        .from("notification_queue")
+                        .update({ is_read: true })
+                        .in("notification_queue_id", unreadIds);
+                      
+                      if (!error) {
+                        setNotifications(notifications.map(n => ({ ...n, is_read: true, read: true })));
+                        toast.success("All notifications cleared");
+                      }
+                   }
+                }}
+                style={{ fontSize: '11px', color: '#3b82f6', border: 'none', background: 'none', cursor: 'pointer', fontWeight: '700' }}
+              >
+                Mark all as read
+              </button>
+            </div>
+          )}
+
           {!loading && notifications.length === 0 && (
             <div style={{ padding: 12 }}>
               No notifications
@@ -153,13 +178,13 @@ export default function NotificationBell() {
           {!loading && notifications.map(n => (
 
             <div
-              key={n.id}
+              key={n.notification_queue_id}
               onClick={() => handleClick(n)}
               style={{
                 padding: 12,
                 borderBottom: "1px solid #eee",
                 cursor: "pointer",
-                background: n.read ? "#fff" : "#eef6ff"
+                background: (n.is_read || n.read) ? "#fff" : "#eef6ff"
               }}
             >
 

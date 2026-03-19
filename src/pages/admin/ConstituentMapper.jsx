@@ -125,19 +125,53 @@ export default function ConstituentMapper() {
     const [masterSubUnits, setMasterSubUnits] = useState([]);
     const [loading, setLoading] = useState(false);
     const [customName, setCustomName] = useState("");
+    const [userProfile, setUserProfile] = useState(null);
 
     useEffect(() => {
         const fetchInitialData = async () => {
-            const { data: orgData } = await supabase.from('organisations').select('organisation_id, organisation_name');
-            setOrgs(orgData || []);
-            const storedOrg = localStorage.getItem('active_org_id');
-            if (storedOrg) setSelectedOrgId(storedOrg);
+            setLoading(true);
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    const { data: profile } = await supabase.schema("core").from("profiles").select("*").eq("id", user.id).single();
+                    setUserProfile(profile);
+                }
 
-            const { data: masterData } = await supabase.from('master_organisation_sub_units').select('*').order('sub_unit_name');
-            setMasterSubUnits(masterData || []);
+                const { data: orgData } = await supabase.from('organisations').select('organisation_id, organisation_name');
+                setOrgs(orgData || []);
+                const storedOrg = localStorage.getItem('active_org_id');
+                if (storedOrg) setSelectedOrgId(storedOrg);
+
+                await fetchMasterSubUnits();
+            } catch (err) {
+                console.error("ConstituentMapper Init failed:", err);
+            } finally {
+                setLoading(false);
+            }
         };
         fetchInitialData();
     }, []);
+
+    const fetchMasterSubUnits = async () => {
+        let query = supabase.from('master_organisation_sub_units').select('*').order('sub_unit_name');
+
+        if (userProfile?.role === 'TENANT_ADMIN' || userProfile?.role === 'ORG_ADMIN') {
+            const level = userProfile.role === 'TENANT_ADMIN' ? 'TENANT' : 'ORGANISATION';
+            const selectionTable = level === 'TENANT' ? 'tenant_master_selections' : 'organisation_master_selections';
+            const filterCol = level === 'TENANT' ? 'tenant_id' : 'organisation_id';
+            const entityId = level === 'TENANT' ? userProfile.tenant_id : userProfile.organisation_id;
+
+            const { data: selections } = await supabase.schema('core').from(selectionTable).select('master_id').eq(filterCol, entityId).eq('master_type', 'sub_unit');
+            if (selections) {
+                const ids = selections.map(s => s.master_id);
+                if (ids.length > 0) query = query.in('id', ids);
+                else { setMasterSubUnits([]); return; }
+            }
+        }
+
+        const { data: masterData } = await query;
+        setMasterSubUnits(masterData || []);
+    };
 
     useEffect(() => {
         if (!selectedOrgId) return;

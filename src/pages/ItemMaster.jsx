@@ -53,20 +53,25 @@ export default function ItemMaster() {
                 .single();
             const tenantId = tenantMap?.tenant_id;
             const orgId = localStorage.getItem("active_org_id");
+
+            // 1. Fetch Organisation Selections for 'item'
+            const { data: selectionData } = await supabase
+                .schema('core')
+                .from('organisation_master_selections')
+                .select('master_id')
+                .eq('organisation_id', orgId)
+                .eq('master_type', 'item');
+            
+            const selectedItemIds = (selectionData || []).map(s => s.master_id);
+
             const [itemsRes, subRes, catRes, uomRes] = await Promise.all([
-                supabase
-                    .from("items")
-                    .select(`
-                        item_id, item_code, item_name, unit_of_measure, is_active, category_id, subobjective_id,
-                        subobjective:object_heads_subobjective (
-                            subobjective_name_en,
-                            subobjective_name_mr
-                        ),
-                        category:item_categories(category_name)
-                    `)
-                    .eq("tenant_id", tenantId)
-                    .eq("organisation_id_uuid", orgId)
-                    .order('created_at', { ascending: false }),
+                selectedItemIds.length > 0 ? 
+                    supabase
+                        .from("item_masters")
+                        .select(`*`)
+                        .in("item_master_id", selectedItemIds)
+                        .order('item_name', { ascending: true })
+                    : { data: [], error: null },
                 supabase
                     .from("object_heads_subobjective")
                     .select("subobjective_id, subobjective_name_en, subobjective_name_mr, object_head_code"),
@@ -207,50 +212,26 @@ export default function ItemMaster() {
                         </thead>
                         <tbody>
                             {filteredItems.length === 0 ? (
-                                <tr><td colSpan="6" style={emptyCell}>No items found. Define your first catalog item.</td></tr>
+                                <tr><td colSpan="7" style={emptyCell}>No items found in your curated catalog.</td></tr>
                             ) : (
-                                filteredItems.map((item, idx) => (
-                                    <tr key={item.item_id} style={tr}>
+                                filteredItems.map((item) => (
+                                    <tr key={item.item_master_id} style={tr}>
                                         <td style={{ ...td, fontWeight: '700', color: '#4f46e5', fontFamily: 'monospace' }}>{item.item_code}</td>
                                         <td style={{ ...td, fontWeight: '600' }}>{item.item_name}</td>
                                         <td style={td}>
-                                            <span style={categoryBadge}>{item.category?.category_name || 'Others'}</span>
+                                            <span style={categoryBadge}>{item.category || 'Others'}</span>
                                         </td>
                                         <td style={td}>
-                                            <span style={uomBadge}>{item.unit_of_measure}</span>
+                                            <span style={uomBadge}>{item.default_uom || 'Nos'}</span>
                                         </td>
                                         <td style={td}>
-                                            {item.subobjective ? (
-                                                <div style={subObjectiveBadge}>
-                                                    <span style={subLabelEn}>{item.subobjective.subobjective_name_en}</span>
-                                                    <span style={subLabelMr}>{item.subobjective.subobjective_name_mr}</span>
-                                                </div>
-                                            ) : (
-                                                <span style={{ color: '#ef4444', fontSize: '12px', fontStyle: 'italic' }}>Unmapped (No Budget Link)</span>
-                                            )}
+                                            <span style={{ fontSize: '11px', color: '#64748b' }}>Master Item</span>
                                         </td>
                                         <td style={td}>
-                                            <span style={{ ...statusBadge, backgroundColor: item.is_active ? '#ecfdf5' : '#fee2e2', color: item.is_active ? '#059669' : '#dc2626' }}>
-                                                {item.is_active ? 'Active' : 'Archived'}
-                                            </span>
+                                            <span style={{ ...statusBadge, backgroundColor: '#ecfdf5', color: '#059669' }}>Active</span>
                                         </td>
                                         <td style={td}>
-                                            <button 
-                                                style={actionBtn} 
-                                                onClick={() => {
-                                                    setNewItem({
-                                                        item_id: item.item_id,
-                                                        item_name: item.item_name,
-                                                        item_code: item.item_code,
-                                                        unit_of_measure: item.unit_of_measure,
-                                                        subobjective_id: item.subobjective_id || (item.subobjective?.subobjective_id),
-                                                        category_id: item.category_id
-                                                    });
-                                                    setShowAddModal(true);
-                                                }}
-                                            >
-                                                Edit Policy
-                                            </button>
+                                            <span style={{ fontSize: '11px', color: '#94a3b8' }}>Statutory</span>
                                         </td>
                                     </tr>
                                 ))

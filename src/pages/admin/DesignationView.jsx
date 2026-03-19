@@ -11,16 +11,31 @@ export default function DesignationView() {
   const { getTranslation, loading } =
     useEntityTranslations("designations")
 
+  const [userProfile, setUserProfile] = useState(null)
+
   useEffect(() => {
-    fetchDesignations()
+    initialize()
   }, [])
 
-  async function fetchDesignations() {
-    const { data, error } = await supabase
-      .from("designations")   // ✅ Correct table
+  async function initialize() {
+    const { data: { user } } = await supabase.auth.getUser()
+    let profile = null
+    if (user) {
+      const { data: p } = await supabase.schema("core").from("profiles").select("*").eq("id", user.id).single()
+      profile = p
+      setUserProfile(p)
+    }
+    fetchDesignations(profile)
+  }
+
+  async function fetchDesignations(profileArg) {
+    const profile = profileArg || userProfile
+    const query = supabase
+      .from("designations")
       .select("*")
       .order("designation_name")
 
+    const { data, error } = await query
     if (!error && data) {
       setDesignations(data)
     }

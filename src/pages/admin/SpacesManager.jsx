@@ -166,6 +166,7 @@ export default function SpacesManager() {
     const [sharedSpaces, setSharedSpaces] = useState([]);
     const [resources, setResources] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [userProfile, setUserProfile] = useState(null);
 
     const [showUnitModal, setShowUnitModal] = useState(false);
     const [showSubUnitModal, setShowSubUnitModal] = useState(false);
@@ -180,9 +181,26 @@ export default function SpacesManager() {
     const [orgTypeName, setOrgTypeName] = useState("");
 
     useEffect(() => {
-        fetchTypes();
-        fetchMasters();
-        fetchUnitMasters();
+        const initialize = async () => {
+            setLoading(true);
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (user) {
+                    const { data: profile } = await supabase.schema("core").from("profiles").select("*").eq("id", user.id).single();
+                    setUserProfile(profile);
+                }
+                await Promise.all([
+                    fetchTypes(),
+                    fetchMasters(),
+                    fetchUnitMasters()
+                ]);
+            } catch (err) {
+                console.error("SpacesManager Init failed:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        initialize();
 
         const onMouseMove = (e) => {
             if (!isResizing.current) return;
@@ -196,12 +214,44 @@ export default function SpacesManager() {
     }, []);
 
     const fetchMasters = async () => {
-        const { data } = await supabase.from('master_organisation_sub_units').select('*').order('sub_unit_name');
+        let query = supabase.from('master_organisation_sub_units').select('*').order('sub_unit_name');
+        
+        if (userProfile?.role === 'TENANT_ADMIN' || userProfile?.role === 'ORG_ADMIN') {
+            const level = userProfile.role === 'TENANT_ADMIN' ? 'TENANT' : 'ORGANISATION';
+            const selectionTable = level === 'TENANT' ? 'tenant_master_selections' : 'organisation_master_selections';
+            const filterCol = level === 'TENANT' ? 'tenant_id' : 'organisation_id';
+            const entityId = level === 'TENANT' ? userProfile.tenant_id : userProfile.organisation_id;
+
+            const { data: selections } = await supabase.schema('core').from(selectionTable).select('master_id').eq(filterCol, entityId).eq('master_type', 'sub_unit');
+            if (selections) {
+                const ids = selections.map(s => s.master_id);
+                if (ids.length > 0) query = query.in('id', ids);
+                else { setMasters([]); return; }
+            }
+        }
+        
+        const { data } = await query;
         setMasters(data || []);
     };
 
     const fetchUnitMasters = async () => {
-        const { data } = await supabase.from('master_organisation_units').select('*').order('unit_name');
+        let query = supabase.from('master_organisation_units').select('*').order('unit_name');
+
+        if (userProfile?.role === 'TENANT_ADMIN' || userProfile?.role === 'ORG_ADMIN') {
+            const level = userProfile.role === 'TENANT_ADMIN' ? 'TENANT' : 'ORGANISATION';
+            const selectionTable = level === 'TENANT' ? 'tenant_master_selections' : 'organisation_master_selections';
+            const filterCol = level === 'TENANT' ? 'tenant_id' : 'organisation_id';
+            const entityId = level === 'TENANT' ? userProfile.tenant_id : userProfile.organisation_id;
+
+            const { data: selections } = await supabase.schema('core').from(selectionTable).select('master_id').eq(filterCol, entityId).eq('master_type', 'unit');
+            if (selections) {
+                const ids = selections.map(s => s.master_id);
+                if (ids.length > 0) query = query.in('id', ids);
+                else { setUnitMasters([]); return; }
+            }
+        }
+
+        const { data } = await query;
         setUnitMasters(data || []);
     };
 

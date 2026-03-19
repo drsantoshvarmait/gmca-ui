@@ -17,38 +17,20 @@ const MasterSelector = ({ level, entityId, masterType, onClose }) => {
             // 1. Fetch the Pool
             let sourcePool = [];
             const typeToTable = {
-                'unit': { table: 'master_organisation_units', nameCol: 'unit_name' },
-                'sub_unit': { table: 'master_organisation_sub_units', nameCol: 'sub_unit_name' },
-                'designation': { table: 'designations', nameCol: 'designation_name' }
+                'unit': { table: 'organisation_units', nameCol: 'unit_name', pk: 'unit_id' },
+                'sub_unit': { table: 'organisation_unit_sub_units', nameCol: 'sub_unit_name', pk: 'id' },
+                'designation': { table: 'designations', nameCol: 'designation_name', pk: 'designation_id' },
+                'item': { table: 'item_masters', nameCol: 'item_name', pk: 'item_master_id' },
+                'vendor': { table: 'proc_vendors', nameCol: 'name', pk: 'vendor_id' }
             };
 
             const config = typeToTable[masterType];
             if (!config) throw new Error("Unsupported master type");
 
-            if (level === 'TENANT') {
+            if (level === 'TENANT' || level === 'ORGANISATION') {
+                // Fetch directly from the Global Pool (Superadmin pool)
                 const { data } = await supabase.from(config.table).select('*').order(config.nameCol);
                 sourcePool = data || [];
-            } else if (level === 'ORGANISATION') {
-                // For Organisation, the pool is the Parent Tenant's selections
-                const { data: org } = await supabase.from('organisations').select('tenant_id').eq('organisation_id', entityId).single();
-                if (org) {
-                    const { data } = await supabase
-                        .schema('core')
-                        .from('tenant_master_selections')
-                        .select('master_id')
-                        .eq('tenant_id', org.tenant_id)
-                        .eq('master_type', masterType);
-                    
-                    const selectedIds = (data || []).map(d => d.master_id);
-                    if (selectedIds.length > 0) {
-                        const { data: masterData } = await supabase.from(config.table).select('*').in('id', selectedIds || []).in('designation_id', selectedIds || []); 
-                        // Note: Some tables use 'id', some 'designation_id'. Let's check.
-                        // Actually, looking at migrations, designations uses designation_id.
-                        const pk = masterType === 'designation' ? 'designation_id' : 'id';
-                        const { data: correctData } = await supabase.from(config.table).select('*').in(pk, selectedIds);
-                        sourcePool = correctData || [];
-                    }
-                }
             }
             setPool(sourcePool);
 
@@ -135,8 +117,16 @@ const MasterSelector = ({ level, entityId, masterType, onClose }) => {
                 {loading ? <div style={{ textAlign: 'center', padding: '20px' }}>Loading...</div> : (
                     <div style={styles.list}>
                         {pool.length === 0 ? <div style={{ textAlign: 'center', padding: '40px', color: '#94a3b8', fontSize: '14px' }}>No masters available in the source pool.</div> : pool.map(m => {
-                            const id = m.id || m.designation_id;
-                            const name = m.unit_name || m.sub_unit_name || m.designation_name;
+                            const config = {
+                                'unit': { pk: 'unit_id', name: 'unit_name' },
+                                'sub_unit': { pk: 'id', name: 'sub_unit_name' },
+                                'designation': { pk: 'designation_id', name: 'designation_name' },
+                                'item': { pk: 'item_master_id', name: 'item_name' },
+                                'vendor': { pk: 'vendor_id', name: 'name' }
+                            }[masterType];
+
+                            const id = m[config.pk];
+                            const name = m[config.name];
                             return (
                                 <div 
                                     key={id} 
