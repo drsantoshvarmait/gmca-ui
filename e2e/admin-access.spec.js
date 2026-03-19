@@ -207,8 +207,8 @@ test.describe('Admin Functional Access Verification', () => {
         const initializing = page.locator('text=INITIALIZING CONSOLE...');
         await expect(initializing).not.toBeVisible({ timeout: 15000 });
 
-        // Check for Super Admin Console header
-        await expect(page.locator('h1')).toContainText(/Super Admin Console/i);
+        // Check for Super Admin Console header via explicit ID
+        await expect(page.locator('#admin-console-header')).toContainText(/Super Admin Console/i);
     });
 
     test('Verify Organization Admin Console Access', async ({ page }) => {
@@ -217,8 +217,8 @@ test.describe('Admin Functional Access Verification', () => {
 
         await expect(page.locator('text=INITIALIZING CONSOLE...')).not.toBeVisible({ timeout: 15000 });
 
-        // Check for Tenant Admin Console header
-        await expect(page.locator('h1')).toContainText(/GMCA Admin Console/i);
+        // Check for Tenant Admin Console header via explicit ID
+        await expect(page.locator('#admin-console-header')).toContainText(/GMCA Admin Console/i);
     });
 
     test('Verify Admin Workflows Access', async ({ page }) => {

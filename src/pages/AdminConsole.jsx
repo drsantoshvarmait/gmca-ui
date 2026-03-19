@@ -179,7 +179,9 @@ export default function AdminConsole() {
         boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)"
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
-          <h1 style={{
+          <h1 
+            id="admin-console-header"
+            style={{
             margin: 0,
             fontSize: "24px",
             fontWeight: "800",

@@ -232,7 +232,7 @@ export default function SuperTenantManager() {
       {/* Hero Section */}
       <div style={hero}>
         <div style={heroText}>
-          <h1 style={heroTitle}>Tenant Directory</h1>
+          <h2 style={heroTitle}>Tenant Directory</h2>
           <p style={heroSub}>Superadmin Console for Global Governance & Regional Compliance</p>
         </div>
         <button style={mainActionBtn} onClick={() => setShowAddTenant(true)}>
